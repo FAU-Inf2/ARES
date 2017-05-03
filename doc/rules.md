@@ -153,7 +153,7 @@ renamed to var2.
 - ARES handles consistent renames automatically during the pattern search. The match annotation
 contains a list of inconsistent renames. Each remaining edit operation that affects
 an identifier after the filter step is added to the match annotation. To avoid an
-overgeneralization it is necessary to keep the list on the match annotation small.
+over-generalization it is necessary to keep the list on the match annotation small.
 
 
 ### Rule 10 (Pos.: 03):
@@ -237,7 +237,7 @@ and (PO,PM) is a pair in the mapping.
 
 **Reason:**
 
-- Reduces the number of unnecessary expression wilcards for identical expressions.
+- Reduces the number of unnecessary expression wildcards for identical expressions.
 
 ### Rule 15 (Pos.: 10):
 **Condition:**
@@ -254,7 +254,7 @@ and (PO,PM) is a pair in the mapping and the trees of the original and the modif
 
 **Reason:**
 
-- Reduces the number of unnecessary wilcards for identical code parts.
+- Reduces the number of unnecessary wildcards for identical code parts.
 
 
 ### Rule 16 (Pos.: 11):
@@ -341,7 +341,7 @@ of wildcards.
 **Reason:**
 
 - Code block changes would lead to a replacement of large code parts with wildcards.
-To avoid this overgeneralization ARES works on the statements instead of the code block.
+To avoid this over-generalization ARES works on the statements instead of the code block.
 
 ### Rule 21 (Pos.: 14):
 **Condition:**
@@ -356,7 +356,7 @@ or the parent is an *for*/*if*/*while* that is not paired with a node in the map
 **Reason:**
 
 - Code block changes would lead to a replacement of large code parts with wildcards.
-To avoid this overgeneralization ARES works on the statements instead of the code block.
+To avoid this over-generalization ARES works on the statements instead of the code block.
 As there are some cases in which a wildcard is necessary, this rule has an extra condition.
 
 ### Rule 22 (Pos.: 15):
@@ -371,7 +371,7 @@ As there are some cases in which a wildcard is necessary, this rule has an extra
 **Reason:**
 
 - Code block changes would lead to a replacement of large code parts with wildcards.
-To avoid this overgeneralization ARES works on the statements instead of the code block.
+To avoid this over-generalization ARES works on the statements instead of the code block.
 
 ### Rule 23 (Pos.: 24):
 **Condition:**
@@ -787,7 +787,7 @@ not affected by an edit operation but all the direct children are.
 
 **Reason:**
 
-- Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific. The exclusion is necessary to prevent an overgeneralization for important 
+- Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific. The exclusion is necessary to prevent an over-generalization for important 
 structure nodes.
 
 
@@ -803,7 +803,7 @@ structure nodes.
 
 **Reason:**
 
-- Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific. The exclusion is necessary to prevent an overgeneralization for important 
+- Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific. The exclusion is necessary to prevent an over-generalization for important 
 structure nodes.
 
 ### Rule 51 (Pos.: 47):
@@ -840,6 +840,6 @@ affects the child at POS of PM.
 ## Rules in the Publication
 
 - Rule 50 covers the assignment with different left and right-hand sides in line 2 of the example in Fig.4.
-- Rule 35 handles the init call in lines 3 and 9 of the example.
+- Rule 35 handles the *init* call in lines 3 and 9 of the example.
 - Rules 15-19 handle identical statements for lines 4 and 8 in the example.
-- Rules 44-46 handle changes that are also coverd by changes of the parent statments for lines 8 and 9 in the example.
+- Rules 44-46 handle changes that are also covered by changes of the parent statements for lines 8 and 9 in the example.
