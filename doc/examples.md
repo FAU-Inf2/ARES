@@ -263,7 +263,6 @@ example() {
   if (foo != null) {
     foo.someMethod(42);
   }
-  System.out.print(foo);
   this.shutdown();
   return foo;
 }
