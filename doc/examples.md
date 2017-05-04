@@ -88,7 +88,7 @@ example() {
   init();
   assert (foo != null);
   foo.someMethod(42);
-  foo.print();
+  foo.run();
   shutdown();
 }
 ```
@@ -99,7 +99,7 @@ example() {
   init();
   if (foo != null) {
     foo.someMethod(42);
-    foo.print();
+    foo.run();
   } 
   shutdown();
 }
@@ -112,7 +112,7 @@ void example(){
   if (foo != null) {
     foo.someMethod(42);
   }
-  foo.print();
+  foo.run();
 }
 ```
 
@@ -138,17 +138,19 @@ example() {
 
 ### Modified Method
 ```java
-example() {
+example() {  
   this.i = 5;
   this.init(verbose);
-  this.shutdown();
   updateValue();
-  while (k < 10) {
+  for (k = 0; k < 10; k++) {
     updateValue();
     printValue("foo");
-    k++;
   }
-  foo.someMethod(42);
+  if (foo != null) {
+    foo.someMethod(42);
+  }
+  System.out.print(foo);
+  this.shutdown();
 }
 ```
 
@@ -157,32 +159,34 @@ example() {
 ### Original Method
 ```java  
 example() {
-  this.i = 5;
-  this.init(verbose);
+  d = 1.0;
+  this.init(true);
   this.shutdown();
   updateValue();
-  while (k < 10) {
-    updateValue();
-    printValue("foo");
-    k++;
+  while (j < 10) {
+    String tmp = "bar";
+    this.execute(tmp);
+    j++;
   }
-  foo.someMethod(42);
+  foo.someMethod(23);
 }
 ```
 
 ### Modified Method
 ```java
-example() {
-  this.i = 5;
-  this.init(verbose);
-  this.shutdown();
+example() {    
+  d = 1.0;
+  this.init(true);
   updateValue();
-  while (k < 10) {
-    updateValue();
-    printValue("foo");
-    k++;
+  for (j = 0; j < 10; j++) {
+    String tmp = "bar";
+    this.execute(tmp);
   }
-  foo.someMethod(42);
+  if (foo != null) {
+    foo.someMethod(23);
+  }
+  assert (foo != null);
+  this.shutdown();
 }
 ```
 
@@ -319,5 +323,4 @@ example() {
   return foo;
 }
 ```
-
 
