@@ -106,7 +106,7 @@ example() {
 ```
 ## LASE Recommendation
 ```java
-void example(){
+void example() {
   init();
   assert(foo != null);
   if (foo != null) {
@@ -185,7 +185,7 @@ example() {
   if (foo != null) {
     foo.someMethod(23);
   }
-  assert (foo != null);
+  this.print(foo);
   this.shutdown();
 }
 ```
@@ -221,8 +221,7 @@ example() {
     for (k = 0; k < 10; k++) {
       //#use (A2);
     }
-    if (foo != null)
-    {
+    if (foo != null) {
       foo.someMethod(42);
     }
     //#choice {
