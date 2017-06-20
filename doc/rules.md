@@ -25,20 +25,7 @@ the order of these rules in the current implementation in parentheses.
 
 ## Rules to handle Annotations
 
-### Rule 01 (Pos.: 05):
-**Condition:**
-
-- Edit Operation affects the choice annotation node.
-
-**Action:**
-
-- Remove the edit operation.
-
-**Reason:**
-
-- Prevent the replacement of choice annotations with wildcards.
-
-### Rule 02 (Pos.: 06):
+### Rule 01 - CaseAnnotationChanges (Pos.: 05):
 **Condition:**
 
 - Edit operation affects the case annotation node.
@@ -51,7 +38,21 @@ the order of these rules in the current implementation in parentheses.
 
 - Prevent the replacement of case annotations with wildcards.
 
-### Rule 03 (Pos.: 07):
+
+### Rule 02 - ChoiceAnnotationChanges (Pos.: 06):
+**Condition:**
+
+- Edit Operation affects the choice annotation node.
+
+**Action:**
+
+- Remove the edit operation.
+
+**Reason:**
+
+- Prevent the replacement of choice annotations with wildcards.
+
+### Rule 03 - RemoveChangesInChoice (Pos.: 07):
 **Condition:**
 
 - The INSERT operation or the modified node of the MOVE operation affect a child of the case annotation.
@@ -65,7 +66,7 @@ the order of these rules in the current implementation in parentheses.
 
 - Prevent wildcards inside the choice annotations.
 
-### Rule 04 (Pos.: 08):
+### Rule 04 - RemoveChangesInCase (Pos.: 08):
 **Condition:**
 
 - The original node of the MOVE or the node of the DELETE operation have a node in their parent hierarchy
@@ -138,7 +139,7 @@ of a use node.
 
 ## Rules to handle Identifier and Constants
 
-### Rule 09 (Pos.: 02):
+### Rule 09 - RemoveIdentifierChanges (Pos.: 02):
 **Condition:**
 
 - Update operation of one identifier is consistent through the source code, i.e., var1 is always
@@ -156,7 +157,7 @@ an identifier after the filter step is added to the match annotation. To avoid a
 over-generalization it is necessary to keep the list on the match annotation small.
 
 
-### Rule 10 (Pos.: 03):
+### Rule 10 - MatchAnnotationChanges (Pos.: 03):
 **Condition:**
 
 - An edit operation affects the list of identifiers or the match annotation directly.
@@ -172,7 +173,7 @@ over-generalization it is necessary to keep the list on the match annotation sma
 
 ## Rules to handle Movements
 
-### Rule 11 (Pos.: 04):
+### Rule 11 - ChangeRootMovements (Pos.: 04):
 **Condition:**
 
 - The change root on the original side starts with a different offset (i.e., statement index in the code block)
@@ -222,7 +223,7 @@ the number of wildcards.
 
 ## Rules to handle Similar/Identical Nodes
 
-### Rule 14 (Pos.: 09):
+### Rule 14 - RemoveChangesOfNodesWithIdenticalType (Pos.: 09):
 **Condition:**
 
 - A DELETE or MOVE operation removes a leaf node of type T with value V at child position POS of parent PO
@@ -239,7 +240,7 @@ and (PO,PM) is a pair in the mapping.
 
 - Reduces the number of unnecessary expression wildcards for identical expressions.
 
-### Rule 15 (Pos.: 10):
+### Rule 15 - RemoveChangesOfNodesWithIdenticalType (Pos.: 10):
 **Condition:**
 
 - A DELETE or MOVE operation removes a node of type T at child position POS of parent PO
@@ -680,7 +681,7 @@ for different items.
 
 ## Other Rules
 
-### Rule 43 (Pos.: 01):
+### Rule 43 - AffectedNodesOutsideMethod (Pos.: 01):
 **Condition:**
 
 - An edit operation affects AST nodes outside of the method body.
