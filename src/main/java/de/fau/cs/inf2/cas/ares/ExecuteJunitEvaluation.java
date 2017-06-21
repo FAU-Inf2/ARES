@@ -29,6 +29,7 @@ import de.fau.cs.inf2.cas.ares.io.AresMapper;
 import de.fau.cs.inf2.cas.ares.io.RecommendationFile;
 import de.fau.cs.inf2.cas.ares.io.RecommendationResult;
 import de.fau.cs.inf2.cas.ares.pipeline.CthreeProcessing;
+import de.fau.cs.inf2.cas.ares.pipeline.SharedMethods;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +40,11 @@ public class ExecuteJunitEvaluation {
   public static final int NUM_THREADS = 8;
   public static final String INPUT_DEFINITION = "data/junit_evaluation/input.json";
 
+  public static final String JUNIT_DATASET_LASE_ALL_INPUTS_RESULTS =
+      "data/junit_evaluation/lase_junit_results.json";
+  public static final String JUNIT_INPUT_DEFINITION =
+      "data/junit_evaluation/input.json";
+  
   /**
    * The main method.
    *
@@ -67,6 +73,8 @@ public class ExecuteJunitEvaluation {
     
     CthreeProcessing.handleGroupPart(cthreeFile, tmpDir, NUM_THREADS);
     writeJson(tmpDir);
+    SharedMethods.printJunitResults(JUNIT_INPUT_DEFINITION, tmpDir.getAbsolutePath(),
+        JUNIT_DATASET_LASE_ALL_INPUTS_RESULTS);
   }
 
   private static void writeJson(File tmpDir) {
