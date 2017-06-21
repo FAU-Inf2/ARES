@@ -73,7 +73,8 @@ public class ExecuteJunitEvaluation {
     
     CthreeProcessing.handleGroupPart(cthreeFile, tmpDir, NUM_THREADS);
     writeJson(tmpDir);
-    SharedMethods.printJunitResults(JUNIT_INPUT_DEFINITION, tmpDir.getAbsolutePath(),
+    SharedMethods.printJunitResults(JUNIT_INPUT_DEFINITION,
+        tmpDir.getAbsolutePath() + "/results/ares_junit_results.json",
         JUNIT_DATASET_LASE_ALL_INPUTS_RESULTS);
   }
 
