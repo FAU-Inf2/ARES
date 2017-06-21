@@ -1,0 +1,165 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'jacoco'
+apply plugin: 'checkstyle'
+apply plugin: 'findbugs'
+
+sourceCompatibility = 1.8
+version = '1.0'
+
+compileJava {
+    options.encoding = "UTF-8"
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'ARES',
+                   'Implementation-Version': version
+    }
+}
+repositories {
+    mavenCentral()
+}
+
+jacocoTestReport {
+  reports {
+    html.destination "${buildDir}/jacocoHtml"
+  }
+}
+
+ 
+
+checkstyle {
+  toolVersion = "6.18"
+  configFile = new File(rootDir, "config/google_checks.xml")
+  ignoreFailures = false
+  sourceSets = gradle.startParameter.taskNames.contains('commitCheck') ? [sourceSets.main] : []
+}
+
+findbugs {
+    toolVersion ="3.0.1"
+    excludeFilter=file("$rootProject.projectDir/config/findbugsfilter.xml")
+    sourceSets = gradle.startParameter.taskNames.contains('commitCheck') ? [sourceSets.main] : []
+}
+
+// Make findbugs output HTML only
+tasks.withType(FindBugs) {
+  reports {
+    xml.enabled = false
+    html.enabled = true
+  }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile group: 'com.tngtech.java', name: 'junit-dataprovider', version: '1.10+'
+
+
+    compile group: 'org.eclipse.jgit',name:'org.eclipse.jgit', version:'4+'
+    compile group: 'com.google.code.findbugs', name:'annotations', version:'3.0.1+' 
+    
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.5.4'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.5.4'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.5.4'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-smile', version: '2.5.4'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.5.4'
+ 
+}
+
+task (executeExamples, dependsOn: 'classes', type:JavaExec) {
+   main = 'de.fau.cs.inf2.cas.ares.ExecuteExamples'
+   classpath = sourceSets.main.runtimeClasspath
+   maxHeapSize = '16g'
+}
+
+task (readEvaluationResults, dependsOn: 'classes', type:JavaExec) {
+   main = 'de.fau.cs.inf2.cas.ares.ReadEvaluationResults'
+   classpath = sourceSets.main.runtimeClasspath
+   maxHeapSize = '16g'
+}
+
+task (executeJunitEvaluation, dependsOn: 'classes', type:JavaExec) {
+   main = 'de.fau.cs.inf2.cas.ares.ExecuteJunitEvaluation'
+   classpath = sourceSets.main.runtimeClasspath
+   maxHeapSize = '16g'
+   if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+   }
+}
+
+task (executeLaseEvaluation, dependsOn: 'classes', type:JavaExec) {
+   main = 'de.fau.cs.inf2.cas.ares.ReadEvaluationResults'
+   classpath = sourceSets.main.runtimeClasspath
+   maxHeapSize = '16g'
+   if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+   }
+}
+
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'resources'
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+    }
+}
+
+test {
+    filter {
+        // Put all unit tests here:
+        includeTestsMatching "de.fau.cs.inf2.cas.ares.test.AresSimpleApplicationTest"
+        includeTestsMatching "de.fau.cs.inf2.cas.ares.test.AresSimpleGeneralizationTest"
+    }
+
+    systemProperty "java.library.path", "lib"
+    jvmArgs += "-Xss5M"
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',  
+            'Implementation-Version': version,
+            'Main-Class': 'com.mkyong.DateUtils'
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task copyDependencies(type: Copy) {
+    into "$buildDir/libsDep"
+    from configurations.runtime
+}
+
+copyDependencies.dependsOn build
+
+tasks.withType(Checkstyle).each { checkstyleTask ->
+  checkstyleTask.doLast {
+    reports.all { report ->
+      def outputFile = report.destination
+      if (outputFile.exists() && outputFile.text.contains("<error ")) {
+          outputs.upToDateWhen { false }
+          throw new GradleException("There were checkstyle warnings! For more info check $outputFile")
+      }
+    }
+  }
+}
+

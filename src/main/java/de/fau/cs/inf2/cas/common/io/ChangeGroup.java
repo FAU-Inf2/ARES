@@ -1,0 +1,97 @@
+package de.fau.cs.inf2.cas.common.io;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.AbstractCollection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+public class ChangeGroup {
+  private final HashSet<String> members;
+
+  /**
+   * Instantiates a new im group.
+   */
+  public ChangeGroup() {
+    members = new HashSet<String>();
+  }
+
+  /**
+   * Instantiates a new im group.
+   *
+   * @param members the members
+   */
+  public ChangeGroup(HashSet<String> members) {
+    this.members = members;
+  }
+
+  /**
+   * Gets the members.
+   *
+   * @return the members
+   */
+  public Set<String> getMembers() {
+    return members;
+  }
+
+  private static String getGroupHash(AbstractCollection<String> collectionMembers) {
+    StringBuilder builder = new StringBuilder();
+    boolean first = true;
+    ArrayList<String> list = new ArrayList<String>(collectionMembers);
+    Collections.sort(list);
+    for (String member : list) {
+      if (first) {
+        first = false;
+      } else {
+        builder.append("_");
+      }
+      builder.append(member);
+    }
+    byte[] bytesOfMessage;
+    StringBuffer sb = new StringBuffer();
+    try {
+      bytesOfMessage = builder.toString().getBytes("UTF-8");
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      byte[] thedigest = md.digest(bytesOfMessage);
+
+      for (int i = 0; i < thedigest.length; ++i) {
+        sb.append(Integer.toHexString((thedigest[i] & 0xFF) | 0x100).substring(1, 3));
+      }
+
+    } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Gets the hash.
+   *
+   * @return the hash
+   */
+  public String getHash() {
+    return getGroupHash(members);
+  }
+
+  /**
+   * Adds the member.
+   *
+   * @param pair the pair
+   */
+  public synchronized void addMember(String pair) {
+    members.add(pair);
+  }
+
+  /**
+   * Adds the members.
+   *
+   * @param members the members
+   */
+  synchronized void addMembers(HashSet<String> members) {
+    this.members.addAll(members);
+  }
+
+}
