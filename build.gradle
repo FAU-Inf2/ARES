@@ -8,17 +8,18 @@ sourceCompatibility = 1.8
 version = '1.0'
 
 compileJava {
-    options.encoding = "UTF-8"
+  options.encoding = "UTF-8"
 }
 
 jar {
-    manifest {
-        attributes 'Implementation-Title': 'ARES',
-                   'Implementation-Version': version
-    }
+  manifest {
+    attributes 'Implementation-Title': 'ARES',
+               'Implementation-Version': version
+  }
 }
+
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 jacocoTestReport {
@@ -33,13 +34,11 @@ checkstyle {
   toolVersion = "6.18"
   configFile = new File(rootDir, "config/google_checks.xml")
   ignoreFailures = false
-  sourceSets = gradle.startParameter.taskNames.contains('commitCheck') ? [sourceSets.main] : []
 }
 
 findbugs {
-    toolVersion ="3.0.1"
-    excludeFilter=file("$rootProject.projectDir/config/findbugsfilter.xml")
-    sourceSets = gradle.startParameter.taskNames.contains('commitCheck') ? [sourceSets.main] : []
+  toolVersion ="3.0.1"
+  excludeFilter=file("$rootProject.projectDir/config/findbugsfilter.xml")
 }
 
 // Make findbugs output HTML only
@@ -51,102 +50,89 @@ tasks.withType(FindBugs) {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.+'
-    testCompile group: 'com.tngtech.java', name: 'junit-dataprovider', version: '1.10+'
+  testCompile group: 'junit', name: 'junit', version: '4.+'
+  testCompile group: 'com.tngtech.java', name: 'junit-dataprovider', version: '1.10+'
 
-
-    compile group: 'org.eclipse.jgit',name:'org.eclipse.jgit', version:'4+'
-    compile group: 'com.google.code.findbugs', name:'annotations', version:'3.0.1+' 
-    
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.5.4'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.5.4'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.5.4'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-smile', version: '2.5.4'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.5.4'
- 
+  compile group: 'org.eclipse.jgit',name:'org.eclipse.jgit', version:'4+'
+  compile group: 'com.google.code.findbugs', name:'annotations', version:'3.0.1+' 
+  
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.5.4'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.5.4'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.5.4'
+  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-smile', version: '2.5.4'
+  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.5.4'
 }
 
 task (executeExamples, dependsOn: 'classes', type:JavaExec) {
-   main = 'de.fau.cs.inf2.cas.ares.ExecuteExamples'
-   classpath = sourceSets.main.runtimeClasspath
-   maxHeapSize = '16g'
+  main = 'de.fau.cs.inf2.cas.ares.ExecuteExamples'
+  classpath = sourceSets.main.runtimeClasspath
+  maxHeapSize = '16g'
 }
 
 task (readEvaluationResults, dependsOn: 'classes', type:JavaExec) {
-   main = 'de.fau.cs.inf2.cas.ares.ReadEvaluationResults'
-   classpath = sourceSets.main.runtimeClasspath
-   maxHeapSize = '16g'
+  main = 'de.fau.cs.inf2.cas.ares.ReadEvaluationResults'
+  classpath = sourceSets.main.runtimeClasspath
+  maxHeapSize = '16g'
 }
 
 task (executeJunitEvaluation, dependsOn: 'classes', type:JavaExec) {
-   main = 'de.fau.cs.inf2.cas.ares.ExecuteJunitEvaluation'
-   classpath = sourceSets.main.runtimeClasspath
-   maxHeapSize = '16g'
-   if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-   }
+  main = 'de.fau.cs.inf2.cas.ares.ExecuteJunitEvaluation'
+  classpath = sourceSets.main.runtimeClasspath
+  maxHeapSize = '16g'
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 task (executeLaseEvaluation, dependsOn: 'classes', type:JavaExec) {
-   main = 'de.fau.cs.inf2.cas.ares.ExecuteLaseEvaluation'
-   classpath = sourceSets.main.runtimeClasspath
-   maxHeapSize = '16g'
-   if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-   }
-}
-
-
-uploadArchives {
-    repositories {
-       flatDir {
-           dirs 'repos'
-       }
-    }
+  main = 'de.fau.cs.inf2.cas.ares.ExecuteLaseEvaluation'
+  classpath = sourceSets.main.runtimeClasspath
+  maxHeapSize = '16g'
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 sourceSets {
-    main {
-        java {
-            srcDir 'src/main/java'
-        }
-        resources {
-            srcDir 'resources'
-        }
+  main {
+    java {
+      srcDir 'src/main/java'
     }
-    test {
-        java {
-            srcDir 'src/test/java'
-        }
+    resources {
+      srcDir 'resources'
     }
+  }
+  test {
+    java {
+      srcDir 'src/test/java'
+    }
+  }
 }
 
 test {
-    filter {
-        // Put all unit tests here:
-        includeTestsMatching "de.fau.cs.inf2.cas.ares.test.AresSimpleApplicationTest"
-        includeTestsMatching "de.fau.cs.inf2.cas.ares.test.AresSimpleGeneralizationTest"
-    }
-
-    systemProperty "java.library.path", "lib"
-    jvmArgs += "-Xss5M"
+  filter {
+    // Put all unit tests here:
+    includeTestsMatching "de.fau.cs.inf2.cas.ares.test.AresSimpleApplicationTest"
+    includeTestsMatching "de.fau.cs.inf2.cas.ares.test.AresSimpleGeneralizationTest"
+  }
+  
+  jvmArgs += "-Xss5M"
 }
 
 task fatJar(type: Jar) {
-    manifest {
-        attributes 'Implementation-Title': 'Gradle Jar File Example',  
-            'Implementation-Version': version,
-            'Main-Class': 'com.mkyong.DateUtils'
-    }
-    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+  manifest {
+    attributes 'Implementation-Title': 'ARES',  
+               'Implementation-Version': version
+  }
+  exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
+  baseName = project.name + '-all'
+  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+  with jar
 }
 
 task copyDependencies(type: Copy) {
-    into "$buildDir/libsDep"
-    from configurations.runtime
+  into "$buildDir/libsDep"
+  from configurations.runtime
 }
 
 copyDependencies.dependsOn build
@@ -156,8 +142,8 @@ tasks.withType(Checkstyle).each { checkstyleTask ->
     reports.all { report ->
       def outputFile = report.destination
       if (outputFile.exists() && outputFile.text.contains("<error ")) {
-          outputs.upToDateWhen { false }
-          throw new GradleException("There were checkstyle warnings! For more info check $outputFile")
+        outputs.upToDateWhen { false }
+        throw new GradleException("There were checkstyle warnings! For more info check $outputFile")
       }
     }
   }
