@@ -53,7 +53,7 @@ We also listed the class that implements the rules. A class may implement more t
 
 - Prevent the replacement of choice annotations with wildcards.
 
-### Rule 03 - RemoveChangesInCase.class  (Pos.: 07):
+### Rule 03 - RemoveChangesInChoice.class  (Pos.: 07):
 **Condition:**
 
 - The INSERT operation or the modified node of the MOVE operation affect a child of the case annotation.
@@ -67,7 +67,7 @@ We also listed the class that implements the rules. A class may implement more t
 
 - Prevent wildcards inside the choice annotations.
 
-### Rule 04 - RemoveChangesInCase.class  (Pos.: 08):
+### Rule 04 - RemoveChangesInChoice.class  (Pos.: 08):
 **Condition:**
 
 - The original node of the MOVE or the node of the DELETE operation have a node in their parent hierarchy
@@ -81,7 +81,7 @@ We also listed the class that implements the rules. A class may implement more t
 
 - Prevent wildcards inside the choice annotations.
 
-### Rule 05 - RemoveWildcardOrUseChanges.class  (Pos.: 23):
+### Rule 05 - RemoveWildcardOrUseChanges.class  (Pos.: 25):
 **Condition:**
 
 - An edit operation affects a part of the wildcard annotation or the wildcard annotation directly.
@@ -95,7 +95,7 @@ We also listed the class that implements the rules. A class may implement more t
 
 - Prevent expression wildcards for wildcard nodes.
 
-### Rule 06 - RemoveWildcardOrUseChanges.class  (Pos.: 24):
+### Rule 06 - RemoveWildcardOrUseChanges.class  (Pos.: 26):
 **Condition:**
 
 - An edit operation affects a part of the use annotation or the use annotation directly.
@@ -109,7 +109,7 @@ We also listed the class that implements the rules. A class may implement more t
 
 - Prevent expression wildcards for use nodes.
 
-### Rule 07 - RemoveChangesToWildcardChildren (Pos.: 44):
+### Rule 07 - RemoveChangesToWildcardChildren.class (Pos.: 48):
 **Condition:**
 
 - The parent of a node that is affected by a delete operation is paired with a parent that is a child
@@ -123,7 +123,7 @@ of a wildcard node.
 
 - Prevent expression wildcards for wildcard nodes.
 
-### Rule 08 -RemoveChangesToWildcardChildren (Pos.: 45):
+### Rule 08 -RemoveChangesToWildcardChildren.class (Pos.: 49):
 **Condition:**
 
 - The parent of a node that is affected by a delete operation is paired with a parent that is a child
@@ -189,7 +189,7 @@ change root and the position difference inside the MOVE operation is equal to th
 
 - Prevents wildcards for statements that are not relevant for the actual code change.
 
-### Rule 12 - RemoveMovesObsoleteDueToWildcards.class  (Pos.: 12,14):
+### Rule 12 - RemoveMovesObsoleteDueToWildcards.class  (Pos.: 12):
 **Condition:**
 
 - A MOVE operation moves a node at child position POS of parent PO to a child of position POS + OFFSET
@@ -204,7 +204,7 @@ equal to OFFSET.
 
 - Prevents the removal of statements due to index changes caused by inserted wildcards.
 
-### Rule 13 - TransformForMovement.class  (Pos.: 17):
+### Rule 13 - TransformForMovement.class  (Pos.: 19):
 **Condition:**
 
 - The MOVE operation moves a *for* node from parent PO to parent PM and the pair (PO,PM) is not in the mapping
@@ -224,7 +224,7 @@ the number of wildcards.
 
 ## Rules to handle Similar/Identical Nodes
 
-### Rule 14 - RemoveChangesOfNodesWithIdenticalType.class  (Pos.: 09):
+### Rule 14 - RemoveChangesOfNodesWithIdenticalType.class  (Pos.: 09, 13):
 **Condition:**
 
 - A DELETE or MOVE operation removes a leaf node of type T with value V at child position POS of parent PO
@@ -241,7 +241,7 @@ and (PO,PM) is a pair in the mapping.
 
 - Reduces the number of unnecessary expression wildcards for identical expressions.
 
-### Rule 15 - RemoveChangesOfNodesWithIdenticalType.class  (Pos.: 10):
+### Rule 15 - RemoveChangesOfNodesWithIdenticalType.class  (Pos.: 10, 14):
 **Condition:**
 
 - A DELETE or MOVE operation removes a node of type T at child position POS of parent PO
@@ -259,7 +259,7 @@ and (PO,PM) is a pair in the mapping and the trees of the original and the modif
 - Reduces the number of unnecessary wildcards for identical code parts.
 
 
-### Rule 16 - RemoveChangesOfNodesWithIdenticalType.class  (Pos.: 11):
+### Rule 16 - RemoveChangesOfNodesWithIdenticalType.class  (Pos.: 11, 15):
 **Condition:**
 
 - A DELETE or MOVE operation removes a node of type T at child position POS of parent PO
@@ -278,60 +278,54 @@ identical or other edit operations cover the differences.
 - Converts wildcards of the parent nodes into smaller wildcards for the children and thus makes the
 pattern more specific.
 
-
-### Rule 17 - RemoveSubChanges (Pos.: 22):
+### Rule 17 - RemoveChangesWithIdenticalPartners.class (Pos.: 45):
 **Condition:**
 
-- The grandparent of the original and the grandparent of the modified node of a MOVE operation 
-form a pair in the mapping and the child position of the original and the modified node is identical
-and the node of the operation is a statement.
+- A MOVE operation moves a node at child position POS of parent PO to a child of position POS + OFFSET
+of parent PM and (PO,PM) is a pair in the mapping and the predicted offset change due to wildcard insertions is
+equal to OFFSET and the nodes (including their subtrees) are identical.
 
 **Action:**
 
-- Remove the edit operation.
+- CONVERT to INSERT of the modified node.
 
-**Reason:**
+**Reasons:**
 
-- Converts wildcards of the parent nodes into smaller wildcards for the children and thus makes the
-pattern more specific.
+- Prevents the removal of identical statements due to index changes caused by inserted wildcards.
 
-### Rule 18 (Pos.: 51):
+### Rule 18 - RemoveChangesWithIdenticalPartners.class (Pos.: 46):
 **Condition:**
 
-- Two parent nodes (PO, PM) are a pair in the mapping and and there exists a
-DELETE or MOVE operation that affects the child at POS of PO that is identical
-to the child at POS of PM.
+- A DELETE operation deletes a node at child position POS of parent PO to a child of position POS + OFFSET
+of parent PM and (PO,PM) is a pair in the mapping and the predicted offset change due to wildcard insertions is
+equal to OFFSET and the nodes (including their subtrees) are identical.
 
 **Action:**
 
-- DELETE: Remove the edit operation.
-- MOVE: Convert to INSERT of the modified node.
+- Remove edit operation.
 
-**Reason:**
+**Reasons:**
 
-- This rule corrects a wrong mapping of identical nodes and reduces the number
-of wildcards.
+- Prevents the removal of identical statements due to index changes caused by inserted wildcards.
 
-### Rule 19 (Pos.: 52):
+### Rule 19 - RemoveChangesWithIdenticalPartners.class (Pos.: 47):
 **Condition:**
 
-- Two parent nodes (PO, PM) are a pair in the mapping and and there exists an
-INSERT or MOVE edit operation that affects the child at POS of PM that is identical
-to the child at POS of PO.
+- A INSERT operation inserts a node at child position POS of parent PO to a child of position POS + OFFSET
+of parent PM and (PO,PM) is a pair in the mapping and the predicted offset change due to wildcard insertions is
+equal to OFFSET and the nodes (including their subtrees) are identical.
 
 **Action:**
 
-- INSERT: Remove the edit operation.
-- MOVE: Convert to DELETE of the original node.
+- Remove edit operation.
 
-**Reason:**
+**Reasons:**
 
-- This rule corrects a wrong mapping of identical nodes and reduces the number
-of wildcards.
+- Prevents the removal of identical statements due to index changes caused by inserted wildcards.
 
 ## AST Type Specific Rules
 
-### Rule 20 - RemoveBlockChanges (Pos.: 13):
+### Rule 20 - RemoveBlockChanges.class (Pos.: 16):
 **Condition:**
 
 - The INSERT operation adds a code block node.
@@ -345,7 +339,7 @@ of wildcards.
 - Code block changes would lead to a replacement of large code parts with wildcards.
 To avoid this over-generalization ARES works on the statements instead of the code block.
 
-### Rule 21 - RemoveBlockChanges (Pos.: 15):
+### Rule 21 - RemoveBlockChanges.class (Pos.: 17):
 **Condition:**
 
 - The DELETE operation deletes a code block node and the parent is not an *if*/*while*/*for*
@@ -361,7 +355,7 @@ or the parent is an *for*/*if*/*while* that is not paired with a node in the map
 To avoid this over-generalization ARES works on the statements instead of the code block.
 As there are some cases in which a wildcard is necessary, this rule has an extra condition.
 
-### Rule 22 - RemoveBlockChanges (Pos.: 16):
+### Rule 22 - RemoveBlockChanges.class (Pos.: 18):
 **Condition:**
 
 - The MOVE operation affects a code block node.
@@ -375,7 +369,7 @@ As there are some cases in which a wildcard is necessary, this rule has an extra
 - Code block changes would lead to a replacement of large code parts with wildcards.
 To avoid this over-generalization ARES works on the statements instead of the code block.
 
-### Rule 23 - RemoveStructureNodeChanges (Pos.: 25):
+### Rule 23 - RemoveStructureNodeChanges.class (Pos.: 27):
 **Condition:**
 
 - An edit operation affects structure AST nodes not relevant for the wildcard creation
@@ -390,7 +384,7 @@ To avoid this over-generalization ARES works on the statements instead of the co
 - These AST parts are not directly visible in the code and therefore it is not possible
 to create useful expression wildcards for these nodes.
 
-### Rule 24 - TransformDeclarationChanges (Pos.: 26):
+### Rule 24 - TransformDeclarationChanges.class (Pos.: 28):
 **Condition:**
 
 - A declaration is not part of an edit operation, but the name, type and initialization expression are all
@@ -406,7 +400,7 @@ affected by edit operations.
 
 - This would create too many expression wildcards which makes the pattern hard to understand and too general.
 
-### Rule 25 - TransformDeclarationChanges (Pos.: 27):
+### Rule 25 - TransformDeclarationChanges.class (Pos.: 29):
 **Condition:**
 
 - A declaration is not affected by an edit operation, but the name is, and the initialization expression is empty
@@ -422,7 +416,7 @@ and none of the edit operations affect the original part.
 
 - This would create too many expression wildcards which makes the pattern hard to understand and too general.
 
-### Rule 26 - RemoveIdentifierMoves (Pos.: 28):
+### Rule 26 - RemoveIdentifierMoves.class (Pos.: 30):
 **Condition:**
 
 - A MOVE operation affects an identifier and the parent node is a method call, field access, declaration, or a comparison expression and the value of the original and the modified identifier is equal.
@@ -435,7 +429,7 @@ and none of the edit operations affect the original part.
 
 - Prevents unnecessary identifiers on the match annotation.
 
-### Rule 27 - RemoveIntegerLiteralChanges (Pos.: 29):
+### Rule 27 - RemoveIntegerLiteralChanges.class (Pos.: 31):
 **Condition:**
 
 - A MOVE operation affects a number constant in the original code.
@@ -449,7 +443,7 @@ and none of the edit operations affect the original part.
 
 - Reduces expression wildcards for numbers.
 
-### Rule 28 - RemoveIntegerLiteralChanges (Pos.: 30):
+### Rule 28 - RemoveIntegerLiteralChanges.class (Pos.: 32):
 **Condition:**
 
 - A DELETE operation affects a number constant inside a list of method call arguments and the parent has a partner in the mapping and there is also a number constant at the same position in the argument list of the paired partner.
@@ -462,35 +456,8 @@ and none of the edit operations affect the original part.
 
 - Reduces expression wildcards for numbers.
 
-### Rule 29 - TransformListInitializerChanges (Pos.: 31):
-**Condition:**
 
-- A MOVE/DELETE/INSERT operation affects a child of a list initializer and the list initializer is part of the original code and has no partner in the mapping.
-
-**Action:**
-
-- Remove the edit operation of all children of the list initializer.
-- Add a DELETE operation for the declaration that contains the initializer.
-
-**Reason:**
-
-- Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific.
-
-### Rule 30 - TransformListInitializerChanges (Pos.: 32):
-**Condition:**
-
-- A MOVE/DELETE/INSERT operation affects a child of a list initializer and the list initializer is part of the modified code or has a partner in the mapping.
-
-**Action:**
-
-- Remove the edit operation of all children of the list initializer.
-- Add a INSERT operation for the declaration that contains the initializer.
-
-**Reason:**
-
-- Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific.
-
-### Rule 31 - TransformIfChanges (Pos.: 33):
+### Rule 29 - TransformIfChanges.class (Pos.: 33):
 **Condition:**
 
 - An *if* is not affected by an edit operation but the condition, all the children of the then-block
@@ -505,7 +472,7 @@ and all the children in the else-block in the original version are.
 
 - Without this rule this condition would create too many expression and statement wildcards which makes the pattern hard to understand and too specific.
 
-### Rule 32 - TransformIfChanges (Pos.: 34):
+### Rule 30 - TransformIfChanges.class (Pos.: 34):
 **Condition:**
 
 - An *if* is not affected by an edit operation but the condition, all the children of the then-block
@@ -520,39 +487,7 @@ and all the children in the else-block in the modified version are.
 
 - Without this rule this condition would create too many expression and statement wildcards which makes the pattern hard to understand and too specific.
 
-
-### Rule 33 (Pos.: 35):
-**Condition:**
-
-- A *for*/*while* is not affected by an edit operation but the condition and all the children of the loop body are.
-
-**Action:**
-
-- Remove the edit operations for the condition and the loop body.
-- Add a DELETE operation for the *for*/*while* node.
-
-**Reason:**
-
-- Without this rule this condition would create too many expression and statement wildcards which makes the pattern hard to understand and too specific.
-
-
-### Rule 34 (Pos.: 36):
-**Condition:**
-
-- A *for*/*while* is not affected by an edit operation but the condition, and all the children of the loop body are
-are.
-
-**Action:**
-
-- Remove the edit operations for the condition and the loop body.
-- Add a INSERT operation for the FOR/WHILE node.
-
-**Reason:**
-
-- Without this rule this condition would create too many expression and statement wildcards which makes the pattern hard to understand and too specific.
-
-
-### Rule 35 (Pos.: 39):
+### Rule 31 - CombineSubchangesOfStatements.class (Pos.: 37):
 **Condition:**
 
 - A DELETE or MOVE operation removes a *call* node at position POS of PO
@@ -570,7 +505,7 @@ argument list is identical.
 - Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific.
 
 
-### Rule 36 (Pos.: 40):
+### Rule 32 - CombineSubchangesOfStatements.class (Pos.: 38):
 **Condition:**
 
 - An INSERT or MOVE operation inserts a *call* node at position POS of PM
@@ -588,7 +523,7 @@ argument list is identical.
 - Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific.
 
 
-### Rule 37 - TransformSwitchLabelChanges (Pos.: 41):
+### Rule 33 - TransformSwitchLabelChanges.class (Pos.: 40):
 **Condition:**
 
 - A MOVE or DELETE operation affects a case node of a *switch* statement.
@@ -604,7 +539,35 @@ argument list is identical.
 - Due to complicated cases concerning the structure of labels and blocks on a *switch* node,
 the Wildcard Insertion only handles INSERT edit operations for *switch* nodes.
 
-### Rule 38 - TransformDeclarationChildrenChanges (Pos.: 42):
+### Rule 34 - TransformListInitializerChanges.class (Pos.: 41):
+**Condition:**
+
+- A MOVE/DELETE/INSERT operation affects a child of a list initializer and the list initializer is part of the original code and has no partner in the mapping.
+
+**Action:**
+
+- Remove the edit operation of all children of the list initializer.
+- Add a DELETE operation for the declaration that contains the initializer.
+
+**Reason:**
+
+- Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific.
+
+### Rule 35 - TransformListInitializerChanges.class (Pos.: 42):
+**Condition:**
+
+- A MOVE/DELETE/INSERT operation affects a child of a list initializer and the list initializer is part of the modified code or has a partner in the mapping.
+
+**Action:**
+
+- Remove the edit operation of all children of the list initializer.
+- Add a INSERT operation for the declaration that contains the initializer.
+
+**Reason:**
+
+- Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific.
+
+### Rule 36 - TransformDeclarationChildrenChanges.class (Pos.: 43):
 **Condition:**
 
 - A declaration in the original version is not affected by an edit operation, but the initialization expression is
@@ -619,7 +582,7 @@ and the partner of the declaration in the mapping has a different name and the t
 
 - Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific.
 
-### Rule 39 - TransformDeclarationChildrenChanges (Pos.: 43):
+### Rule 37 - TransformDeclarationChildrenChanges.class (Pos.: 44):
 **Condition:**
 
 - A declaration in the modified version is not affected by an edit operation, but the initialization expression is
@@ -635,7 +598,7 @@ and the partner of the declaration in the mapping has a different name and the t
 
 - Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific.
 
-### Rule 40 - TransformOrCondition (Pos.: 46):
+### Rule 38 - TransformOrCondition.class (Pos.: 50):
 **Condition:**
 
 - An INSERT operation adds a boolean *or* expression at child position POS of parent and PO has a partner
@@ -652,7 +615,7 @@ for different items.
 
 - Use the associativity of the *or* expression to reduce the number of expression wildcards.
 
-### Rule 41 - TransformClassCreaterDelete (Pos.: 48):
+### Rule 39 - TransformClassCreatorDelete.class (Pos.: 52):
 **Condition:**
 
 - A DELETE operation removes a *ClassCreator* node that is child of a declaration.
@@ -666,23 +629,23 @@ for different items.
 
 - The current grammar does not support a *ClassCreator* node as expression wildcard.
 
-### Rule 42 (Pos.: 49):
+### Rule 40 - RemoveAccessChanges.class (Pos.: 54):
 **Condition:**
 
-- An INSERT operation adds a *ClassCreator* node.
-
+- A DELETE operation deletes an *access* node in parent PO at POS, there is a pair (PO, PM) in the mapping
+and at POS in PM there is also an *access* node.
 **Action:**
 
 - Remove the edit operation.
-- Add an INSERT operation for the complete declaration.
 
-**Reason:**
+**Reasons:**
 
-- The current grammar does not support a *ClassCreator* node as expression wildcard.
+-  Prevent expression wildcards that are also covered by other changes.
+
 
 ## Other Rules
 
-### Rule 43 - AffectedNodesOutsideMethodBlock (Pos.: 01):
+### Rule 41 - AffectedNodesOutsideMethodBlock.class (Pos.: 01):
 **Condition:**
 
 - An edit operation affects AST nodes outside of the method body.
@@ -699,7 +662,7 @@ If only the modified node lies outside the method body, convert to DELETE of the
 
 - Ignore nodes from the method signature and the surrounding class.
 
-### Rule 44  - RemoveSubChanges (Pos.: 18):
+### Rule 42  - RemoveSubChanges.class (Pos.: 20):
 **Condition:**
 
 - The parent of a node in a DELETE operation is also part of a DELETE or MOVE operation.
@@ -712,7 +675,7 @@ If only the modified node lies outside the method body, convert to DELETE of the
 
 - Prevent expression wildcards that are also covered by wildcards of the parent nodes.
 
-### Rule 45 - RemoveSubChanges (Pos.: 19):
+### Rule 43 - RemoveSubChanges.class (Pos.: 21):
 **Condition:**
 
 - The parent of a node in an INSERT operation is also part of an INSERT or MOVE operation.
@@ -725,7 +688,7 @@ If only the modified node lies outside the method body, convert to DELETE of the
 
 - Prevent expression wildcards that are also covered by wildcards of the parent nodes.
 
-### Rule 46 - RemoveSubChanges (Pos.: 20):
+### Rule 44 - RemoveSubChanges.class (Pos.: 22):
 **Condition:**
 
 - The parent of the modified node of a MOVE operation is part of an INSERT or MOVE operation
@@ -739,7 +702,7 @@ and the parent of the original node of a MOVE operation is also part of a DELETE
 
 - Prevent expression wildcards that are also covered by wildcards of the parent nodes.
 
-### Rule 47 RemoveSubChanges (Pos.: 21):
+### Rule 45 RemoveSubChanges.class (Pos.: 23)
 **Condition:**
 
 - The parent of the modified node of a MOVE operation is part of an INSERT or MOVE operation
@@ -753,7 +716,24 @@ and the parent of the original node of a MOVE operation is not part of an DELETE
 
 - Prevent expression wildcards that are also covered by wildcards of the parent nodes.
 
-### Rule 49 - CombineSubchangesOfStatements (Pos.: 37):
+### Rule 46 - RemoveSubChanges.class (Pos.: 24):
+**Condition:**
+
+- The grandparent of the original and the grandparent of the modified node of a MOVE operation 
+form a pair in the mapping and the child position of the original and the modified node is identical
+and the node of the operation is a statement.
+
+**Action:**
+
+- Remove the edit operation.
+
+**Reason:**
+
+- Converts wildcards of the parent nodes into smaller wildcards for the children and thus makes the
+pattern more specific.
+
+
+### Rule 47 - CombineSubchangesOfStatements.class (Pos.: 35):
 **Condition:**
 
 - A node (excluding *condition*, *try*, *for*, *while*, *if* nodes) 
@@ -771,7 +751,7 @@ not affected by an edit operation but all the direct children are.
 structure nodes.
 
 
-### Rule 50 - CombineSubchangesOfStatements (Pos.: 38):
+### Rule 48 - CombineSubchangesOfStatements.class (Pos.: 36):
 **Condition:**
 
 - A node (excluding *condition*, *try*, *for*, *while*, *if* node) in the modified version at statement level (e.g., a direct child of a code block) is not affected by an edit operation but all the direct children are.
@@ -786,7 +766,25 @@ structure nodes.
 - Without this rule this condition would create too many expression wildcards which makes the pattern hard to understand and too specific. The exclusion is necessary to prevent an over-generalization for important 
 structure nodes.
 
-### Rule 51 - AddInsertForChangeRootBodyMapping (Pos.: 47):
+### Rule 49 - TransformStatementChanges.class (Pos.: 39):
+**Condition:**
+
+- Two parent nodes (PO, PM) are a pair in the mapping and there exists a
+DELETE/MOVE that affects the child at POS of PO and an INSERT that
+affects the child at POS of PM.
+
+**Action:**
+
+- DELETE: Remove the operation.
+- INSERT: Remove if the children are identical.
+- MOVE: Convert to INSERT of the modified node.
+
+**Reason:**
+
+- Reduces the number of duplicate wildcards as the insert wildcard already covers this change.
+
+
+### Rule 50 - AddInsertForChangeRootBodyPairs.class (Pos.: 51):
 **Condition:**
 
 - A node inside the change root of the modified part is not affected by an edit operation and the partner in the mapping is not a direct child of the change root of the original part.
@@ -799,27 +797,56 @@ structure nodes.
 
 - Add wildcards for nodes that originate from a different block and are added to the change root.
 
-### Rule 52 (Pos.: 50):
+
+### Rule 51 - AddDeleteForChangeRootStatements.class (Pos.: 53):
 **Condition:**
 
-- Two parent nodes (PO, PM) are a pair in the mapping and there exists a
-DELETE/MOVE that affects the child at POS of PO and an INSERT that
-affects the child at POS of PM.
+- A MOVE operation moves a node from one change root to the other and the change roots are not a pair
+in the mapping and the change root of the original code is not part of a DELETE operation.
+**Action:**
+
+- Add a DELETE operation for the node.
+
+**Reasons:**
+
+- Previous filters deleted the MOVE operation. Under the specified conditions, it is necessary to
+add a DELETE operation. This prevents a wrong pattern as otherwise the pattern is not applicable
+to the input changes.
+
+### Rule 53 - AddInsertForAlignments.class (Pos.: 55):
+**Condition:**
+
+- A MOVE operation moves a node from one change root to the other and there is a node N
+in both change roots that is not part of any edit operations and that has a wrong position of the
+MOVE is filtered.
 
 **Action:**
 
-- DELETE: Remove the operation.
-- MOVE: Convert to INSERT of the modified node.
+- Add a INSERT operation for node N.
 
-**Reason:**
+**Reasons:**
 
-- Reduces the number of duplicate wildcards as the insert wildcard already covers this change.
+- Previous filters deleted the MOVE operation. Under the specified conditions, it is necessary to
+add a INSERT operation. This prevents a wrong pattern as otherwise the pattern is not applicable
+to the input changes.
 
+### Rule 54 - AddInsertForStatementsBetweenUses.class (Pos.: 56):
+**Condition:**
 
+- A statement N in the modified part that is not part of the original part stands between two statements that
+will be use annotations.
+
+**Action:**
+
+- Add a INSERT operation for node N.
+
+**Reasons:**
+
+- This reduces the accuracy but avoids additional choice annotations.
 
 ## Rules in the Publication
 
-- Rule 50 covers the assignment with different left and right-hand sides in line 2 of the example in Fig.4.
-- Rule 35 handles the *init* call in lines 3 and 9 of the example.
-- Rules 15-19 handle identical statements for lines 4 and 8 in the example.
-- Rules 44-46 handle changes that are also covered by changes of the parent statements for lines 8 and 9 in the example.
+- Rule 48 covers the assignment with different left and right-hand sides in line 2 of the example in Fig.4.
+- Rule 31 handles the *init* call in lines 3 and 9 of the example.
+- Rules 13-19 handle identical statements for lines 4 and 8 in the example.
+- Rules 42-46 handle changes that are also covered by changes of the parent statements for lines 8 and 9 in the example.
