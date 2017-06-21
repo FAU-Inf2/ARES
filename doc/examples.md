@@ -59,11 +59,11 @@ example() {
 ```java
 example() {
   //# match (original) {
-    init();
-    assert (foo != null);
-    foo.someMethod(42);
-    //#wildcard stmt(A0);
-    shutdown();
+  init();
+  //# wildcard stmt(ARES0);
+  foo.someMethod(42);
+  //# wildcard stmt(ARES1);
+  shutdown();
   //# }
 }
 ```
@@ -72,12 +72,12 @@ example() {
 ```java
 example() {
   //# match (modified) {
-    init();
-    if (foo != null) {
-      foo.someMethod(42);
-      //#use (A0);
-    }
-    shutdown();
+  init();
+  if (foo != null) {
+    foo.someMethod(42);
+    //# use (ARES1);
+  }
+  shutdown();
   //# }
 }
 ```
@@ -127,6 +127,7 @@ example() {
   this.init(verbose);
   this.shutdown();
   updateValue();
+  k = 0;
   while (k < 10) {
     updateValue();
     printValue("foo");
@@ -163,6 +164,7 @@ example() {
   this.init(true);
   this.shutdown();
   updateValue();
+  j = 0;
   while (j < 10) {
     String tmp = "bar";
     this.execute(tmp);
@@ -195,18 +197,18 @@ example() {
 ### Original Method
 ```java
 example() {
-  //#match (original, (k)) {
-    //#wildcard expr(A1,verbose,1)
-    this.init(verbose);
-    this.shutdown(); //important
-    updateValue();
-    k = 0;
-    while (k < 10) {
-      //#wildcard stmt(A2);
-      k++;
-    }
-    //#wildcard stmt(A3);
-    foo.someMethod(42);
+  //# match (original, (k)) {
+  //# wildcard expr(ARES0, verbose, 1)
+  this.init(verbose);
+  this.shutdown();
+  updateValue();
+  k = 0;
+  while (k < 10) {
+    //# wildcard stmt(ARES1);
+    k++;
+  }
+  //#wildcard stmt(A3);
+  foo.someMethod(42);
   //# }
 }
 ```
@@ -214,23 +216,25 @@ example() {
 ### Modified Method
 ```java
 example() {
-  //#match (modified) {
-    //#use (A1,verbose,1)
-    this.init(verbose);
-    updateValue();
-    for (k = 0; k < 10; k++) {
-      //#use (A2);
-    }
-    if (foo != null) {
-      foo.someMethod(42);
-    }
-    //#choice {
-    //#case
-      System.out.print(foo);
-    //#case
-      this.print(foo);
-    //# }
-    this.shutdown();
+  //# match (modified) {
+  //# use (A1,verbose,1)
+  this.init(verbose);
+  updateValue();
+  for (k = 0; k < 10; k++) {
+    //# use (A2);
+  }
+  if (foo != null) {
+    foo.someMethod(42);
+  }
+  //# choice {
+  //# case {
+    System.out.print(foo);
+  // }
+  //#case {
+    this.print(foo);
+  //# }
+  //# }
+  this.shutdown();
   //# }
 }
 ```
@@ -260,9 +264,9 @@ example() {
   Foo foo = Library.getObject();
   this.init(getVerbose());
   updateValue();
-  for (c = 0; c < 10; c++) {
+  for (c = 0; c < 10; c++)
     System.out.println(c);
-  }
+  
   if (foo != null) {
     foo.someMethod(42);
   }
