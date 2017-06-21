@@ -88,7 +88,7 @@ task (executeJunitEvaluation, dependsOn: 'classes', type:JavaExec) {
 }
 
 task (executeLaseEvaluation, dependsOn: 'classes', type:JavaExec) {
-   main = 'de.fau.cs.inf2.cas.ares.ReadEvaluationResults'
+   main = 'de.fau.cs.inf2.cas.ares.ExecuteLaseEvaluation'
    classpath = sourceSets.main.runtimeClasspath
    maxHeapSize = '16g'
    if (project.hasProperty("appArgs")) {
