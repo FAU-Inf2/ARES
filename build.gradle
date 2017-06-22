@@ -34,11 +34,13 @@ checkstyle {
   toolVersion = "6.18"
   configFile = new File(rootDir, "config/google_checks.xml")
   ignoreFailures = false
+  sourceSets = [sourceSets.main]
 }
 
 findbugs {
   toolVersion ="3.0.1"
   excludeFilter=file("$rootProject.projectDir/config/findbugsfilter.xml")
+  sourceSets = [sourceSets.main]
 }
 
 // Make findbugs output HTML only
