@@ -20,6 +20,8 @@ This repository is structured as follows:
 
 ## Building and Running ARES
 
+**Note**: ARES requires at least 16GB of main memory.
+
 Build ARES:
 
 ```
