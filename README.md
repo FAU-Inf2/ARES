@@ -38,13 +38,13 @@ gradle readEvaluationResults,
 
 Execute the evaluation of the LASE dataset:
 ```
-gradle executeLaseEvaluation -PappArgs="['PATH']" 
+gradle executeLaseEvaluation -PappArgs="['OUTPUT_PATH']" 
 ```
 - Depending on your internet connection and device, this can take over an hour to execute. The execution requires a download of the ECLIPSE SWT and ECLIPSE JDT CORE repositories and needs to checkout several hundred revisions.
 
 Execute the evaluation of the JUnit dataset:
 ```
-gradle executeJunitEvaluation -PappArgs="['PATH']" ,
+gradle executeJunitEvaluation -PappArgs="['OUTPUT_PATH']" ,
 ```
 - Depending on your internet connection and device, this can take over an hour to execute. The execution requires a download from the JUnit repository and needs to checkout several thousand revisions.
 
