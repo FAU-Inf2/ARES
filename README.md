@@ -49,6 +49,29 @@ Execute the evaluation of the JUnit dataset:
 - Depending on your internet connection and device, this can take over an hour to execute. The execution requires a download of the JUnit repository and needs to checkout several thousand revisions.
 
 
+## Building and Running ARES inside a Docker container
+
+For convenience and for reproducible builds, it is also possible to run ARES inside a Docker container (see `docker/`).
+
+Build the Docker image from the Dockerfile:
+
+```
+./build.sh
+```
+
+Start a Docker container and execute the specified Gradle tasks:
+
+```
+./run.sh <TASKS>
+```
+
+For example, type the following to execute the LASE evaluation:
+
+```
+./run.sh executeLaseEvaluation
+```
+
+
 ## License
 
 - The source code of ARES in [src](src) is licensed under the MIT license (see [LICENSE.mit](LICENSE.mit)).
