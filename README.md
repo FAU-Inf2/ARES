@@ -46,7 +46,7 @@ Execute the evaluation of the JUnit dataset:
 ```
 ./gradlew executeJunitEvaluation -PappArgs="['OUTPUT_PATH']" ,
 ```
-- Depending on your internet connection and device, this can take over an hour to execute. The execution requires a download from the JUnit repository and needs to checkout several thousand revisions.
+- Depending on your internet connection and device, this can take over an hour to execute. The execution requires a download of the JUnit repository and needs to checkout several thousand revisions.
 
 
 ## License
