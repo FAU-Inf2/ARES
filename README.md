@@ -23,28 +23,28 @@ This repository is structured as follows:
 Build ARES:
 
 ```
-gradle build
+./gradlew build
 ```
 
 Run the examples in  [data/examples](data/examples):
 ```
-gradle executeExamples
+./gradlew executeExamples
 ```
 
 Read evaluation results in  [data/junit_evaluation](data/junit_evaluation) and  [data/lase_evaluation](data/lase_evaluation):
 ```
-gradle readEvaluationResults,
+./gradlew readEvaluationResults,
 ```
 
 Execute the evaluation of the LASE dataset:
 ```
-gradle executeLaseEvaluation -PappArgs="['OUTPUT_PATH']" 
+./gradlew executeLaseEvaluation -PappArgs="['OUTPUT_PATH']" 
 ```
 - Depending on your internet connection and device, this can take over an hour to execute. The execution requires a download of the ECLIPSE SWT and ECLIPSE JDT CORE repositories and needs to checkout several hundred revisions.
 
 Execute the evaluation of the JUnit dataset:
 ```
-gradle executeJunitEvaluation -PappArgs="['OUTPUT_PATH']" ,
+./gradlew executeJunitEvaluation -PappArgs="['OUTPUT_PATH']" ,
 ```
 - Depending on your internet connection and device, this can take over an hour to execute. The execution requires a download from the JUnit repository and needs to checkout several thousand revisions.
 
