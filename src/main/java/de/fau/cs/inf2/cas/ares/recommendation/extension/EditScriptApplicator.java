@@ -1,28 +1,26 @@
 /*
  * Copyright (c) 2017 Programming Systems Group, CS Department, FAU
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 
 package de.fau.cs.inf2.cas.ares.recommendation.extension;
 
+import de.fau.cs.inf2.cas.ares.bast.general.AresWrapper;
 import de.fau.cs.inf2.cas.ares.bast.general.ParentHierarchyHandler;
 import de.fau.cs.inf2.cas.ares.bast.general.ParserFactory;
 import de.fau.cs.inf2.cas.ares.bast.nodes.AresBlock;
@@ -38,7 +36,7 @@ import de.fau.cs.inf2.cas.ares.recommendation.WildcardInstance;
 import de.fau.cs.inf2.cas.ares.recommendation.visitors.ApplyWhitespaceVisitor;
 import de.fau.cs.inf2.cas.ares.recommendation.visitors.FindParentMethodVisitor;
 import de.fau.cs.inf2.cas.ares.recommendation.visitors.ReplaceNameVisitor;
-
+import de.fau.cs.inf2.cas.ares.recommendation.visitors.ReplaceValueVisitor;
 import de.fau.cs.inf2.cas.common.bast.general.BastField;
 import de.fau.cs.inf2.cas.common.bast.general.BastFieldConstants;
 import de.fau.cs.inf2.cas.common.bast.general.BastInfo;
@@ -60,13 +58,17 @@ import de.fau.cs.inf2.cas.common.bast.nodes.BastForStmt;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastFunction;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastIf;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastIntConst;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastLabelStmt;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastListInitializer;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastNameIdent;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastNew;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastParameter;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastParameterList;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastProgram;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastRealConst;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastStringConst;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastStructDecl;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastStructMember;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastSwitch;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastSwitchCaseGroup;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastUnaryExpr;
@@ -92,6 +94,7 @@ import de.fau.cs.inf2.mtdiff.editscript.operations.UpdateOperation;
 import de.fau.cs.inf2.mtdiff.editscript.operations.advanced.AdvancedEditOperation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -364,8 +367,8 @@ public class EditScriptApplicator {
       if (skip) {
         continue outer;
       }
-      final BastFieldConstants childrenListNumber = editOp
-          .getOldOrChangedIndex().childrenListNumber;
+      final BastFieldConstants childrenListNumber =
+          editOp.getOldOrChangedIndex().childrenListNumber;
       switch (editOp.getType()) {
         case ALIGN: {
           orderAlign(templateOriginalParents, deletes, inserts, editOp, inChoice,
@@ -380,8 +383,8 @@ public class EditScriptApplicator {
           inserts.add(editOp);
           break;
         case MOVE: {
-          orderMove(template, templateOriginalParents, deletes, inserts, editOp, npi,
-              inChoice, childrenListNumber);
+          orderMove(template, templateOriginalParents, deletes, inserts, editOp, npi, inChoice,
+              childrenListNumber);
           break;
         }
         case UPDATE:
@@ -428,7 +431,7 @@ public class EditScriptApplicator {
 
   private static void orderDelete(ExtendedAresPattern template,
       Map<AbstractBastNode, NodeParentInformationHierarchy> templateOriginalParents,
-      LinkedList<BastEditOperation> deletes, BastEditOperation editOp, 
+      LinkedList<BastEditOperation> deletes, BastEditOperation editOp,
       final BastFieldConstants childrenListNumber) {
     boolean skip = false;
     if (operationChangesAresNode(editOp)) {
@@ -456,8 +459,7 @@ public class EditScriptApplicator {
   private static void orderAlign(
       Map<AbstractBastNode, NodeParentInformationHierarchy> templateOriginalParents,
       LinkedList<BastEditOperation> deletes, ArrayList<BastEditOperation> inserts,
-      BastEditOperation editOp, boolean inChoice,
-      final BastFieldConstants childrenListNumber) {
+      BastEditOperation editOp, boolean inChoice, final BastFieldConstants childrenListNumber) {
     if (!inChoice) {
       inserts.add(editOp);
     }
@@ -784,15 +786,12 @@ public class EditScriptApplicator {
       String indentation = extractIndentationFromList(fieldNodes);
 
       if (indentation != null) {
-        NodeParentInformationHierarchy whiteSpaceNpi =
-            newHierarchy.get(npi.list.get(0).parent);
+        NodeParentInformationHierarchy whiteSpaceNpi = newHierarchy.get(npi.list.get(0).parent);
         String diff = extractWhitespaceDifference(indentation, whiteSpaceNpi);
         if (diff != null && diff.length() > 0) {
-          JavaToken wildcardToken =
-              CreateJavaNodeHelper.findLeftJavaToken(instance.wildcard);
+          JavaToken wildcardToken = CreateJavaNodeHelper.findLeftJavaToken(instance.wildcard);
           JavaToken useToken = CreateJavaNodeHelper.findLeftJavaToken(node);
-          if (!wildcardToken.whiteSpace.toString()
-              .equals(useToken.whiteSpace.toString())) {
+          if (!wildcardToken.whiteSpace.toString().equals(useToken.whiteSpace.toString())) {
             awv = new ApplyWhitespaceVisitor(indentation, diff, 0);
           }
 
@@ -811,25 +810,20 @@ public class EditScriptApplicator {
       if (getFirstParent(npi).getTag() == BastBlock.TAG
           && instance.headNodes.get(i).getTag() == BastBlock.TAG) {
         @SuppressWarnings("unchecked")
-        LinkedList<AbstractBastNode> tmpStmts =
-            (LinkedList<AbstractBastNode>) instance.headNodes.get(i)
-                .getField(BastFieldConstants.BLOCK_STATEMENT).getListField();
+        LinkedList<AbstractBastNode> tmpStmts = (LinkedList<AbstractBastNode>) instance.headNodes
+            .get(i).getField(BastFieldConstants.BLOCK_STATEMENT).getListField();
         for (int j = 0; j < tmpStmts.size(); j++) {
-          InsertOperation insOp =
-              new InsertOperation(getFirstParent(npi), tmpStmts.get(j), new NodeIndex(
-                  npi.list.get(0).fieldConstant, npi.list.get(0).listId + i + j));
+          InsertOperation insOp = new InsertOperation(getFirstParent(npi), tmpStmts.get(j),
+              new NodeIndex(npi.list.get(0).fieldConstant, npi.list.get(0).listId + i + j));
           block = applyInsert(template, insOp, block, shadowBlock, tmpStmts.get(j),
-              getFirstParent(npi), getFirstParent(npi), npi.list.get(0).fieldConstant,
-              npi, false);
+              getFirstParent(npi), getFirstParent(npi), npi.list.get(0).fieldConstant, npi, false);
           printAst(block);
         }
       } else {
-        InsertOperation insOp =
-            new InsertOperation(getFirstParent(npi), instance.headNodes.get(i),
-                new NodeIndex(npi.list.get(0).fieldConstant, npi.list.get(0).listId + i));
-        block = applyInsert(template, insOp, block, shadowBlock,
-            instance.headNodes.get(i), getFirstParent(npi), getFirstParent(npi),
-            npi.list.get(0).fieldConstant, npi, false);
+        InsertOperation insOp = new InsertOperation(getFirstParent(npi), instance.headNodes.get(i),
+            new NodeIndex(npi.list.get(0).fieldConstant, npi.list.get(0).listId + i));
+        block = applyInsert(template, insOp, block, shadowBlock, instance.headNodes.get(i),
+            getFirstParent(npi), getFirstParent(npi), npi.list.get(0).fieldConstant, npi, false);
         printAst(block);
       }
     }
@@ -867,8 +861,7 @@ public class EditScriptApplicator {
       }
       AbstractBastNode pattern = WildcardAccessHelper.getExpr(node);
       AbstractBastNode associatedStatement = parentNodes.get(pos);
-      FindNodesFromTagVisitor findOccurence =
-          new FindNodesFromTagVisitor(pattern.getTag());
+      FindNodesFromTagVisitor findOccurence = new FindNodesFromTagVisitor(pattern.getTag());
       associatedStatement.accept(findOccurence);
       LinkedList<AbstractBastNode> partner = new LinkedList<>();
       for (AbstractBastNode tmpOccurence : findOccurence.nodes) {
@@ -880,8 +873,7 @@ public class EditScriptApplicator {
       if (occurence < partner.size()) {
         AbstractBastNode foundNode = partner.get((int) occurence);
         NodeParentInformationHierarchy npiFound = newHierarchy.get(foundNode);
-        NodeParentInformationHierarchy npiDel =
-            newHierarchy.get(instance.headNodes.get(0));
+        NodeParentInformationHierarchy npiDel = newHierarchy.get(instance.headNodes.get(0));
         assert (npiDel != null);
         for (int i = 0; i < instance.headNodes.size(); i++) {
           @SuppressWarnings("unchecked")
@@ -889,21 +881,19 @@ public class EditScriptApplicator {
               (LinkedList<AbstractBastNode>) getFirstParent(npiFound)
                   .getField(npiFound.list.get(0).fieldConstant).getListField();
           if (items != null
-              && items.size() > npiFound.list.get(0).listId
-                  - (instance.headNodes.size() - 1) + i
+              && items.size() > npiFound.list.get(0).listId - (instance.headNodes.size() - 1) + i
               && npiFound.list.get(0).listId - (instance.headNodes.size() - 1) + i >= 0) {
-            if (WildcardAccessHelper.isEqual(instance.headNodes.get(i), items.get(
-                npiFound.list.get(0).listId - (instance.headNodes.size() - 1) + i))) {
+            if (WildcardAccessHelper.isEqual(instance.headNodes.get(i),
+                items.get(npiFound.list.get(0).listId - (instance.headNodes.size() - 1) + i))) {
               continue;
             }
           }
           InsertOperation insOp = new InsertOperation(getFirstParent(npiFound),
-              instance.headNodes.get(i), new NodeIndex(npiFound.list.get(0).fieldConstant,
-                  npiFound.list.get(0).listId + i));
-          block =
-              applyInsert(template, insOp, block, shadowBlock, instance.headNodes.get(i),
-                  getFirstParent(npiFound), getFirstParent(npiFound),
-                  npiFound.list.get(0).fieldConstant, npiFound, false);
+              instance.headNodes.get(i),
+              new NodeIndex(npiFound.list.get(0).fieldConstant, npiFound.list.get(0).listId + i));
+          block = applyInsert(template, insOp, block, shadowBlock, instance.headNodes.get(i),
+              getFirstParent(npiFound), getFirstParent(npiFound),
+              npiFound.list.get(0).fieldConstant, npiFound, false);
         }
       }
       DeleteOperation delOp = new DeleteOperation(getFirstParent(npi), node,
@@ -936,8 +926,7 @@ public class EditScriptApplicator {
     }
     AbstractBastNode pattern = WildcardAccessHelper.getExpr(node);
     AbstractBastNode associatedStatement = parentNodes.get(pos);
-    FindNodesFromTagVisitor findOccurence =
-        new FindNodesFromTagVisitor(pattern.getTag());
+    FindNodesFromTagVisitor findOccurence = new FindNodesFromTagVisitor(pattern.getTag());
     associatedStatement.accept(findOccurence);
     LinkedList<AbstractBastNode> partner = new LinkedList<>();
     for (AbstractBastNode tmpOccurence : findOccurence.nodes) {
@@ -949,15 +938,14 @@ public class EditScriptApplicator {
     if (occurence < partner.size()) {
       AbstractBastNode foundNode = partner.get((int) occurence);
       NodeParentInformationHierarchy npiFound = newHierarchy.get(foundNode);
-      NodeParentInformationHierarchy npiDel =
-          newHierarchy.get(instance.headNodes.get(0));
+      NodeParentInformationHierarchy npiDel = newHierarchy.get(instance.headNodes.get(0));
       assert (npiDel != null);
-      InsertOperation insOp = new InsertOperation(getFirstParent(npiFound),
-          instance.headNodes.get(0), new NodeIndex(npiFound.list.get(0).fieldConstant,
-              npiFound.list.get(0).listId));
-      block = applyInsert(template, insOp, block, shadowBlock,
-          instance.headNodes.get(0), getFirstParent(npiFound), getFirstParent(npiFound),
-          npiFound.list.get(0).fieldConstant, npiFound, false);
+      InsertOperation insOp =
+          new InsertOperation(getFirstParent(npiFound), instance.headNodes.get(0),
+              new NodeIndex(npiFound.list.get(0).fieldConstant, npiFound.list.get(0).listId));
+      block = applyInsert(template, insOp, block, shadowBlock, instance.headNodes.get(0),
+          getFirstParent(npiFound), getFirstParent(npiFound), npiFound.list.get(0).fieldConstant,
+          npiFound, false);
     }
     DeleteOperation delOp = new DeleteOperation(getFirstParent(npi), node,
         new NodeIndex(npi.list.get(0).fieldConstant, npi.list.get(0).listId));
@@ -1019,8 +1007,7 @@ public class EditScriptApplicator {
   private static void applyUpdateToAsgnExpr(UpdateOperation uop, AbstractBastNode oldFoundNode) {
     BasicJavaToken javaToken;
     TokenAndHistory oldTokenCmp;
-    ((BastAsgnExpr) oldFoundNode).operation =
-        ((BastAsgnExpr) uop.getNewOrChangedNode()).operation;
+    ((BastAsgnExpr) oldFoundNode).operation = ((BastAsgnExpr) uop.getNewOrChangedNode()).operation;
     oldTokenCmp = ((BastAsgnExpr) oldFoundNode).info.tokens[0];
     javaToken = null;
     switch (((BastAsgnExpr) oldFoundNode).operation) {
@@ -1065,8 +1052,7 @@ public class EditScriptApplicator {
         return;
     }
     ((BastAsgnExpr) oldFoundNode).info.tokens[0] = CreateJavaNodeHelper.createTokenHistory(
-        ((JavaToken) ((BastAsgnExpr) oldFoundNode).info.tokens[0].token).whiteSpace
-            .toString(),
+        ((JavaToken) ((BastAsgnExpr) oldFoundNode).info.tokens[0].token).whiteSpace.toString(),
         javaToken);
     ((BastAsgnExpr) oldFoundNode).info.tokens[0].prevTokens.addAll(oldTokenCmp.prevTokens);
   }
@@ -1076,8 +1062,7 @@ public class EditScriptApplicator {
     BasicJavaToken javaToken;
     TokenAndHistory oldTokenCmp;
     javaToken = null;
-    ((BastBasicType) oldFoundNode).typeTag =
-        ((BastBasicType) uop.getNewOrChangedNode()).typeTag;
+    ((BastBasicType) oldFoundNode).typeTag = ((BastBasicType) uop.getNewOrChangedNode()).typeTag;
     oldTokenCmp = ((BastBasicType) oldFoundNode).info.tokens[0];
     switch (((BastBasicType) oldFoundNode).typeTag) {
 
@@ -1110,8 +1095,7 @@ public class EditScriptApplicator {
         return;
     }
     ((BastBasicType) oldFoundNode).info.tokens[0] = CreateJavaNodeHelper.createTokenHistory(
-        ((JavaToken) ((BastBasicType) oldFoundNode).info.tokens[0].token).whiteSpace
-            .toString(),
+        ((JavaToken) ((BastBasicType) oldFoundNode).info.tokens[0].token).whiteSpace.toString(),
         javaToken);
     ((BastBasicType) oldFoundNode).info.tokens[0].prevTokens.addAll(oldTokenCmp.prevTokens);
   }
@@ -1147,8 +1131,7 @@ public class EditScriptApplicator {
         return;
     }
     ((BastUnaryExpr) oldFoundNode).info.tokens[0] = CreateJavaNodeHelper.createTokenHistory(
-        ((JavaToken) ((BastUnaryExpr) oldFoundNode).info.tokens[0].token).whiteSpace
-            .toString(),
+        ((JavaToken) ((BastUnaryExpr) oldFoundNode).info.tokens[0].token).whiteSpace.toString(),
         javaToken);
     ((BastUnaryExpr) oldFoundNode).info.tokens[0].prevTokens.addAll(oldTokenCmp.prevTokens);
   }
@@ -1159,8 +1142,7 @@ public class EditScriptApplicator {
     ((BastListInitializer) oldFoundNode).open =
         ((BastListInitializer) uop.getNewOrChangedNode()).open;
     if (((BastListInitializer) oldFoundNode).open) {
-      oldFoundNode.info.tokens[2] =
-          CreateJavaNodeHelper.createTokenHistory(BasicJavaToken.COMMA);
+      oldFoundNode.info.tokens[2] = CreateJavaNodeHelper.createTokenHistory(BasicJavaToken.COMMA);
     } else {
       oldFoundNode.info.tokens[2] = null;
     }
@@ -1196,8 +1178,7 @@ public class EditScriptApplicator {
     ((JavaToken) oldFoundNode.info.tokens[0].token).data.setLength(0);
     ((JavaToken) oldFoundNode.info.tokens[0].token).data
         .append(((JavaToken) uop.getNewOrChangedNode().info.tokens[0].token).data.toString());
-    ((BastStringConst) oldFoundNode).value =
-        ((BastStringConst) uop.getNewOrChangedNode()).value;
+    ((BastStringConst) oldFoundNode).value = ((BastStringConst) uop.getNewOrChangedNode()).value;
   }
 
 
@@ -1311,7 +1292,7 @@ public class EditScriptApplicator {
       Map<AbstractBastNode, NodeParentInformationHierarchy> templateParents,
       ArrayList<BastEditOperation> inserts, BastBlock block, AbstractBastNode shadowBlock,
       boolean addUseOffset) {
-    HashMap<String, String> nameMap = createNameMapForInsert(template);
+    HashMap<Integer, HashMap<String, String>> nameMap = createNameMapForInsert(template);
     for (int i = 0; i < inserts.size(); i++) {
       printAst(block);
       BastEditOperation editOp = inserts.get(i);
@@ -1386,42 +1367,63 @@ public class EditScriptApplicator {
   }
 
 
-  private static HashMap<String, String> createNameMapForInsert(ExtendedAresPattern template) {
-    HashMap<String, String> nameMap = new HashMap<>();
-    HashMap<String, String> reverseMap = new HashMap<>();
-
-    HashSet<String> toRemove = new HashSet<>();
+  private static HashMap<Integer, HashMap<String, String>> createNameMapForInsert(
+      ExtendedAresPattern template) {
+    HashMap<Integer, HashMap<String, String>> tagMap = new HashMap<>();
+    HashMap<Integer, HashMap<String, String>> reverseTagMap = new HashMap<>();
+    HashMap<Integer, HashSet<String>> toRemoveMap = new HashMap<>();
     for (Entry<AbstractBastNode, AbstractBastNode> entry : template.assignmentMap.entrySet()) {
-      if (entry.getKey().getTag() == BastNameIdent.TAG) {
-        final String keyName = ((BastNameIdent) entry.getKey()).name;
-        final String valueName = ((BastNameIdent) entry.getValue()).name;
-        if (keyName.equals(valueName)) {
-          continue;
+
+      HashMap<String, String> valueMap = tagMap.get(entry.getKey().getTag());
+      if (valueMap == null) {
+        valueMap = new HashMap<>();
+        tagMap.put(entry.getKey().getTag(), valueMap);
+      }
+      HashMap<String, String> reverseValueMap = reverseTagMap.get(entry.getKey().getTag());
+      if (reverseValueMap == null) {
+        reverseValueMap = new HashMap<>();
+        reverseTagMap.put(entry.getKey().getTag(), reverseValueMap);
+      }
+
+      String keyName = AresWrapper.staticGetValue(entry.getKey());
+      String valueName = AresWrapper.staticGetValue(entry.getValue());
+      if ((keyName != null && !keyName.equals("")) 
+          || (valueName != null && !valueName.equals(""))) {
+        if (!keyName.equals(valueName)) {
+          HashSet<String> toRemoveSet = toRemoveMap.get(entry.getKey().getTag());
+          if (toRemoveSet == null) {
+            toRemoveSet = new HashSet<>();
+            toRemoveMap.put(entry.getKey().getTag(), toRemoveSet);
+          }
+          if (valueMap.containsKey(keyName) && !valueMap.get(keyName).equals(valueName)) {
+            toRemoveSet.add(keyName);
+            toRemoveSet.add(valueName);
+            toRemoveSet.add(valueMap.get(keyName));
+          } else if (reverseValueMap.containsKey(valueName)
+              && !reverseValueMap.get(valueName).equals(keyName)) {
+            toRemoveSet.add(keyName);
+            toRemoveSet.add(valueName);
+            toRemoveSet.add(reverseValueMap.get(valueName));
+          } else {
+            valueMap.put(keyName, valueName);
+            reverseValueMap.put(valueName, keyName);
+          }
         }
-        if (nameMap.containsKey(keyName) && !nameMap.get(keyName).equals(valueName)) {
-          toRemove.add(keyName);
-          toRemove.add(valueName);
-          toRemove.add(nameMap.get(keyName));
-          continue;
-        }
-        if (reverseMap.containsKey(valueName) && !reverseMap.get(valueName).equals(keyName)) {
-          toRemove.add(keyName);
-          toRemove.add(valueName);
-          toRemove.add(reverseMap.get(valueName));
-          continue;
-        }
-        nameMap.put(keyName, valueName);
-        reverseMap.put(valueName, keyName);
       }
     }
-    for (String name : toRemove) {
-      nameMap.remove(name);
+    for (Entry<Integer, HashSet<String>> entry : toRemoveMap.entrySet()) {
+      final HashMap<String, String> valueMap = tagMap.get(entry.getKey());
+      if (valueMap != null) {
+        for (String name : entry.getValue()) {
+          valueMap.remove(name);
+        }
+      }
     }
-    return nameMap;
+    return tagMap;
   }
 
 
-  private static void renameIdentifierInInsert(HashMap<String, String> nameMap,
+  private static void renameIdentifierInInsert(HashMap<Integer, HashMap<String, String>> nameMap,
       AbstractBastNode foundNode, NodeParentInformationHierarchy npiTemplate) {
     if (foundNode != null && npiTemplate != null && foundNode.getTag() != AresChoiceStmt.TAG) {
       boolean insideChoice = false;
@@ -1431,7 +1433,7 @@ public class EditScriptApplicator {
         }
       }
       if (!insideChoice) {
-        ReplaceNameVisitor rnv = new ReplaceNameVisitor(nameMap);
+        ReplaceValueVisitor rnv = new ReplaceValueVisitor(nameMap);
         foundNode.accept(rnv);
       }
     }

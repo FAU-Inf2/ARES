@@ -268,7 +268,7 @@ example() {
     System.out.println(c);
   
   if (foo != null) {
-    foo.someMethod(42);
+    foo.someMethod(99);
   }
   this.shutdown();
   return foo;
@@ -284,7 +284,7 @@ example() {
     System.out.println(c);
   }
   if (foo != null) {
-    foo.someMethod(42);
+    foo.someMethod(99);
   }
   System.out.print(foo);
   this.shutdown();
@@ -301,7 +301,7 @@ example() {
     System.out.println(c);
   }
   if (foo != null) {
-    foo.someMethod(42);
+    foo.someMethod(99);
   }
   this.print(foo);
   this.shutdown();

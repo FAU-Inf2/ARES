@@ -9,7 +9,7 @@ class AresInput {
     for (c = 0; c < 10; c++)
       System.out.println(c);
     if (foo != null) {
-      foo.someMethod(42);
+      foo.someMethod(99);
     }
     this.shutdown();
     return foo;
@@ -29,7 +29,7 @@ class AresInput {
     for (c = 0; c < 10; c++)
       System.out.println(c);
     if (foo != null) {
-      foo.someMethod(42);
+      foo.someMethod(99);
     }
     System.out.print(foo);
     this.shutdown();
@@ -50,7 +50,7 @@ class AresInput {
     for (c = 0; c < 10; c++)
       System.out.println(c);
     if (foo != null) {
-      foo.someMethod(42);
+      foo.someMethod(99);
     }
     this.print(foo);
     this.shutdown();

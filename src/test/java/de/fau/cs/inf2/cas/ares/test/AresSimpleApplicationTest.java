@@ -26,24 +26,12 @@ package de.fau.cs.inf2.cas.ares.test;
 import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 import de.fau.cs.inf2.cas.ares.io.AresMapper;
-import de.fau.cs.inf2.cas.ares.recommendation.RecommendationCreator;
-
-import de.fau.cs.inf2.cas.common.bast.nodes.BastBlock;
-import de.fau.cs.inf2.cas.common.bast.nodes.BastClassDecl;
-import de.fau.cs.inf2.cas.common.bast.nodes.BastFunction;
-import de.fau.cs.inf2.cas.common.bast.nodes.BastProgram;
-
-import de.fau.cs.inf2.cas.common.parser.ParserType;
-
-import de.fau.cs.inf2.cas.common.io.ReadableEncodedGroup;
 import de.fau.cs.inf2.cas.common.io.ReadableEncodedGroupFile;
-import de.fau.cs.inf2.cas.common.io.ReadableEncodedScript;
 
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -55,8 +43,8 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedList;
+
+
 
 @RunWith(DataProviderRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
