@@ -3,6 +3,12 @@
 This repository contains the ARES source code, a description of the ARES rule system and the evaluation results of the research paper 
 "G.  Dotzler, M. Kamp, P. Kreutzer, M. Philippsen: More Accurate Recommendations for Method-Level Changes".
 
+
+Archived Copy: 
+
+[![DOI](https://zenodo.org/badge/90181502.svg)](https://zenodo.org/badge/latestdoi/90181502)
+
+
 ## Structure
 
 This repository is structured as follows:
