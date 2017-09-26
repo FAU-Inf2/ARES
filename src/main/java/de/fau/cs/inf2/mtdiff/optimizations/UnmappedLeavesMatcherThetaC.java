@@ -100,8 +100,8 @@ public class UnmappedLeavesMatcherThetaC {
                     mappings.unlink(child, childPartner);
                     mappings.addMapping(child, node);
                   } else if (mappings.getSrc(parents2.get(childPartner)) == null) {
-                    mappings.unlink(childPartner, child);
-                    mappings.addMapping(node, child);
+                    mappings.unlink(child, childPartner);
+                    mappings.addMapping(child, node);
                   }
                 }
               }

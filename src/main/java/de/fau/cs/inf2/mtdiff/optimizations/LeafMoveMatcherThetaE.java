@@ -77,7 +77,7 @@ public class LeafMoveMatcherThetaE {
       workListTmp = new LinkedList<>();
       for (ComparePair<INode> pair : workList) {
         INode firstParent = parents1.get(pair.getOldElement());
-        if (!mappings.hasDst(firstParent)) {
+        if (firstParent == null || !mappings.hasDst(firstParent)) {
           continue;
         }
         INode secondParent = mappings.getDst(parents1.get(pair.getOldElement()));
@@ -116,6 +116,9 @@ public class LeafMoveMatcherThetaE {
       for (ComparePair<INode> pair : workList) {
         INode firstParent = parents1.get(pair.getOldElement());
         INode secondParent = parents2.get(pair.getNewElement());
+        if (firstParent == null) {
+          continue;
+        }
         reevaluateLeaves(firstParent, secondParent, pair, changeMap, mappings);
       }
       Collections.sort(changeMap, new MappingComparator());
