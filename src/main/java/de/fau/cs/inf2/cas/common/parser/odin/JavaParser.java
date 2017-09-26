@@ -2925,13 +2925,24 @@ public class JavaParser implements IParser {
       case MULTIPLY:
       case DIV:
       case REMAINDER:
-        return true;
+        return priorityMultiply(right);
       default:
         throw new SyntaxError("Invalid token.", (IGeneralToken) null);
 
     }
   }
 
+  private boolean priorityMultiply(BasicJavaToken right) {
+    switch (right) {
+      case MULTIPLY:
+      case DIV:
+      case REMAINDER:
+        return false;
+      default:
+        return true;
+    }
+  }
+  
   private boolean priorityOrOr(BasicJavaToken right) {
     if (right == BasicJavaToken.OR_OR) {
       return true;
@@ -3009,7 +3020,6 @@ public class JavaParser implements IParser {
       case AND:
       case EQUAL_EQUAL:
       case NOT_EQUAL:
-      case INSTANCEOF:
         return true;
       default:
         return false;
@@ -3025,11 +3035,6 @@ public class JavaParser implements IParser {
       case AND:
       case EQUAL_EQUAL:
       case NOT_EQUAL:
-      case INSTANCEOF:
-      case LESS:
-      case LESS_EQUAL:
-      case GREATER:
-      case GREATER_EQUAL:
         return true;
       default:
         return false;
@@ -3050,9 +3055,6 @@ public class JavaParser implements IParser {
       case LESS_EQUAL:
       case GREATER:
       case GREATER_EQUAL:
-      case SAR:
-      case SLR:
-      case SLL:
         return true;
       default:
         return false;
@@ -3076,8 +3078,6 @@ public class JavaParser implements IParser {
       case SAR:
       case SLR:
       case SLL:
-      case PLUS:
-      case MINUS:
         return true;
       default:
         return false;
