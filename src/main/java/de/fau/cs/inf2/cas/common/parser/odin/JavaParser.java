@@ -121,9 +121,9 @@ import de.fau.cs.inf2.cas.common.parser.SyntaxError;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Stack;
 
 public class JavaParser implements IParser {
 
@@ -1354,9 +1354,9 @@ public class JavaParser implements IParser {
       final TokenAndHistory inputTokenAndHistory) {
     TokenAndHistory currentTokenAndHistory = inputTokenAndHistory;
     ParseResult<AbstractBastExpr> left = prefixExpression3(lexer, data, currentTokenAndHistory);
-    Stack<AbstractBastExpr> stack = new Stack<AbstractBastExpr>();
-    Stack<TokenAndHistory> tokenStack = new Stack<TokenAndHistory>();
-    Stack<Integer> tokenCount = new Stack<Integer>();
+    ArrayDeque<AbstractBastExpr> stack = new ArrayDeque<AbstractBastExpr>();
+    ArrayDeque<TokenAndHistory> tokenStack = new ArrayDeque<TokenAndHistory>();
+    ArrayDeque<Integer> tokenCount = new ArrayDeque<Integer>();
     if (left.value == null) {
       return new ParseResult<AbstractBastExpr>(null, null);
     }
@@ -1373,6 +1373,9 @@ public class JavaParser implements IParser {
     ParseResult<AbstractBastExpr> right = new ParseResult<AbstractBastExpr>(null, null);
     right = rightInCondOr(lexer, data, currentTokenAndHistory);
     currentTokenAndHistory = right.currentTokenAndHistory;
+    if (right.value == null) {
+      return new ParseResult<AbstractBastExpr>(null, null);
+    }
     stack.push(right.value);
     nextToken = lexer.nextToken(data, currentTokenAndHistory);
     nextnextToken = lexer.nextToken(data, nextToken);
@@ -1443,7 +1446,8 @@ public class JavaParser implements IParser {
   }
 
   private TokenAndHistory addExpressionToken(final JavaLexer lexer, final FileData data,
-      Stack<TokenAndHistory> tokenStack, Stack<Integer> tokenCount, TokenAndHistory nextToken,
+      ArrayDeque<TokenAndHistory> tokenStack, ArrayDeque<Integer> tokenCount,
+      TokenAndHistory nextToken,
       TokenAndHistory nextnextToken) {
     TokenAndHistory currentTokenAndHistory;
     tokenStack.push(nextToken);
@@ -1470,8 +1474,9 @@ public class JavaParser implements IParser {
     return currentTokenAndHistory;
   }
 
-  private void stackMergeIteration(Stack<AbstractBastExpr> stack, Stack<TokenAndHistory> tokenStack,
-      Stack<Integer> tokenCount) {
+  private void stackMergeIteration(ArrayDeque<AbstractBastExpr> stack,
+      ArrayDeque<TokenAndHistory> tokenStack,
+      ArrayDeque<Integer> tokenCount) {
     AbstractBastExpr leftExpr;
     AbstractBastExpr rightExpr;
     rightExpr = stack.pop();
@@ -2944,16 +2949,12 @@ public class JavaParser implements IParser {
   }
   
   private boolean priorityOrOr(BasicJavaToken right) {
-    if (right == BasicJavaToken.OR_OR) {
-      return true;
-    }
     return false;
   }
 
   private boolean priorityAndAnd(BasicJavaToken right) {
     switch (right) {
       case OR_OR:
-      case AND_AND:
         return true;
       default:
         return false;
@@ -2964,7 +2965,6 @@ public class JavaParser implements IParser {
     switch (right) {
       case OR_OR:
       case AND_AND:
-      case OR:
         return true;
       default:
         return false;
@@ -2976,7 +2976,6 @@ public class JavaParser implements IParser {
       case OR_OR:
       case AND_AND:
       case OR:
-      case XOR:
         return true;
       default:
         return false;
@@ -2989,7 +2988,6 @@ public class JavaParser implements IParser {
       case AND_AND:
       case OR:
       case XOR:
-      case AND:
         return true;
       default:
         return false;
@@ -3003,8 +3001,6 @@ public class JavaParser implements IParser {
       case OR:
       case XOR:
       case AND:
-      case EQUAL_EQUAL:
-      case NOT_EQUAL:
         return true;
       default:
         return false;
@@ -3905,7 +3901,7 @@ public class JavaParser implements IParser {
 
   private AbstractBastExpr mergeStack(AbstractBastExpr left, AbstractBastExpr right,
       final TokenAndHistory inputTokenAndHistory, final TokenAndHistory inputTokenAndHistory2,
-      final TokenAndHistory inputTokenAndHistory3, Stack<TokenAndHistory> tokenStack) {
+      final TokenAndHistory inputTokenAndHistory3, ArrayDeque<TokenAndHistory> tokenStack) {
     TokenAndHistory[] tokens = null;
     if (inputTokenAndHistory2 == null) {
       tokens = new TokenAndHistory[1];
