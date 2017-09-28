@@ -1397,7 +1397,7 @@ public class JavaParser implements IParser {
         }
       }
       while (!tokenStack.isEmpty()
-          && higherOrEqualPriority(((JavaToken) tokenStack.peek().token).type, bjt)) {
+          && higherOrEqualPriority(getPeekToken(tokenStack, tokenCount), bjt)) {
 
         stackMergeIteration(stack, tokenStack, tokenCount);
 
@@ -1432,7 +1432,27 @@ public class JavaParser implements IParser {
     }
     return new ParseResult<AbstractBastExpr>(stack.pop(), currentTokenAndHistory);
   }
-
+  
+  private BasicJavaToken getPeekToken(ArrayDeque<TokenAndHistory> tokenStack,
+      ArrayDeque<Integer> tokenCount) {
+    if (tokenCount.peek() == 1) {
+      return ((JavaToken) tokenStack.peek().token).type;
+    }
+    TokenAndHistory second = tokenStack.pop();
+    TokenAndHistory first = tokenStack.peek();
+    tokenStack.push(second);
+    if (TokenChecker.isLess(first) && TokenChecker.isLess(second)) {
+      return BasicJavaToken.SLL;
+    } else {
+      assert (TokenChecker.isGreater(first) && TokenChecker.isGreater(second));
+      if (tokenCount.peek() == 3) {
+        return BasicJavaToken.SLR;
+      } else {
+        return BasicJavaToken.SAR;
+      }
+    }
+  }
+  
   private ParseResult<AbstractBastExpr> rightInCondOr(final JavaLexer lexer, final FileData data,
       TokenAndHistory currentTokenAndHistory) {
     ParseResult<AbstractBastExpr> right;
@@ -2930,31 +2950,24 @@ public class JavaParser implements IParser {
       case MULTIPLY:
       case DIV:
       case REMAINDER:
-        return priorityMultiply(right);
+        return true;
       default:
         throw new SyntaxError("Invalid token.", (IGeneralToken) null);
 
     }
   }
 
-  private boolean priorityMultiply(BasicJavaToken right) {
-    switch (right) {
-      case MULTIPLY:
-      case DIV:
-      case REMAINDER:
-        return false;
-      default:
-        return true;
-    }
-  }
-  
   private boolean priorityOrOr(BasicJavaToken right) {
+    if (right == BasicJavaToken.OR_OR) {
+      return true;
+    }
     return false;
   }
 
   private boolean priorityAndAnd(BasicJavaToken right) {
     switch (right) {
       case OR_OR:
+      case AND_AND:
         return true;
       default:
         return false;
@@ -2965,6 +2978,7 @@ public class JavaParser implements IParser {
     switch (right) {
       case OR_OR:
       case AND_AND:
+      case OR:
         return true;
       default:
         return false;
@@ -2976,6 +2990,7 @@ public class JavaParser implements IParser {
       case OR_OR:
       case AND_AND:
       case OR:
+      case XOR:
         return true;
       default:
         return false;
@@ -2988,6 +3003,7 @@ public class JavaParser implements IParser {
       case AND_AND:
       case OR:
       case XOR:
+      case AND:
         return true;
       default:
         return false;
@@ -3001,6 +3017,8 @@ public class JavaParser implements IParser {
       case OR:
       case XOR:
       case AND:
+      case EQUAL_EQUAL:
+      case NOT_EQUAL:
         return true;
       default:
         return false;
@@ -3016,6 +3034,7 @@ public class JavaParser implements IParser {
       case AND:
       case EQUAL_EQUAL:
       case NOT_EQUAL:
+      case INSTANCEOF:
         return true;
       default:
         return false;
@@ -3031,6 +3050,11 @@ public class JavaParser implements IParser {
       case AND:
       case EQUAL_EQUAL:
       case NOT_EQUAL:
+      case INSTANCEOF:
+      case LESS:
+      case LESS_EQUAL:
+      case GREATER:
+      case GREATER_EQUAL:
         return true;
       default:
         return false;
@@ -3051,6 +3075,9 @@ public class JavaParser implements IParser {
       case LESS_EQUAL:
       case GREATER:
       case GREATER_EQUAL:
+      case SAR:
+      case SLR:
+      case SLL:
         return true;
       default:
         return false;
@@ -3074,6 +3101,8 @@ public class JavaParser implements IParser {
       case SAR:
       case SLR:
       case SLL:
+      case PLUS:
+      case MINUS:
         return true;
       default:
         return false;
