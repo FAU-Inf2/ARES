@@ -88,6 +88,7 @@ import java.util.concurrent.Executors;
 
 public class CthreeProcessing {
   public static final int MAX_INPUT_SIZE = 20;
+  public static final boolean SKIP_ERRORS = true;
 
   /**
    * Handle group part.
@@ -130,9 +131,12 @@ public class CthreeProcessing {
     ExecutorService executioner = Executors.newFixedThreadPool(numThreads);
     ExecutorService innerExecutioner = Executors.newFixedThreadPool(numThreads);
     File repoDir = new File(tmpDir, "/repositories/");
+    int count = 0;
     for (ChangeGroup group : groups) {
+      count++;
       String groupHash = group.getHash();
-      System.out.println(new Date() + " Start with change group " + groupHash + ".");
+      System.out.println(new Date() + " Start with change group " 
+          + groupHash + "(" + count + "/" + groups.size() + ").");
 
       File folder = new File(tmpDir.getAbsolutePath() + "/results/" + groupHash + "/");
       if (!folder.exists()) {
@@ -140,6 +144,12 @@ public class CthreeProcessing {
         if (!success) {
           System.err.println("Could not create Folder!");
           System.exit(-1);
+        }
+      } else if (SKIP_ERRORS) {
+        final File outputFile = new File(folder, "/time_create.json");
+        if (outputFile.exists()) {
+          System.out.println(new Date() + " Finished change group " + groupHash + ".");
+          continue;
         }
       }
 
