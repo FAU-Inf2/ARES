@@ -67,7 +67,12 @@ public class ExecuteAresOnCthreeOutput {
         System.exit(-1);
       }
     }
-    
+    int start = -1;
+    int end = -1;
+    if (args.length == 4) {
+      start = Integer.parseInt(args[2]);
+      end = Integer.parseInt(args[3]);
+    }
     CthreeProcessing.handleGroupPart(cthreeFile, tmpDir, NUM_THREADS);
     writeJson(tmpDir);
   }

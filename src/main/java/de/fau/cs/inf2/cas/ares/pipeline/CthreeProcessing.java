@@ -98,6 +98,17 @@ public class CthreeProcessing {
    * @param numThreads the num threads
    */
   public static void handleGroupPart(File cthreeFile, File tmpDir, int numThreads) {
+    handleGroupPart(cthreeFile,tmpDir,numThreads, -1, -1);
+  }
+  
+  /**
+   * Handle group part.
+   *
+   * @param cthreeFile the cthree file
+   * @param tmpDir the tmp dir
+   * @param numThreads the num threads
+   */
+  public static void handleGroupPart(File cthreeFile, File tmpDir, int numThreads, int start, int end) {
     HashMap<String, CommitPairIdentifier> cpis = new HashMap<>();
     HashMap<CommitPairIdentifier, String> cpisIds = new HashMap<>();
     ArrayList<ChangeGroup> groups = new ArrayList<>();
@@ -132,8 +143,20 @@ public class CthreeProcessing {
     ExecutorService innerExecutioner = Executors.newFixedThreadPool(numThreads);
     File repoDir = new File(tmpDir, "/repositories/");
     int count = 0;
+    if (start == -1) {
+      start = 0;
+    }
+    if (end == -1) {
+      end = groups.size();
+    }
     for (ChangeGroup group : groups) {
       count++;
+      if (count < start) {
+        continue;
+      }
+      if (count > end) {
+        break;
+      }
       String groupHash = group.getHash();
       System.out.println(new Date() + " Start with change group " 
           + groupHash + "(" + count + "/" + groups.size() + ").");
