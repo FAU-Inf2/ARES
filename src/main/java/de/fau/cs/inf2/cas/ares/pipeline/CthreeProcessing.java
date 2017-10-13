@@ -108,7 +108,8 @@ public class CthreeProcessing {
    * @param tmpDir the tmp dir
    * @param numThreads the num threads
    */
-  public static void handleGroupPart(File cthreeFile, File tmpDir, int numThreads, int start, int end) {
+  public static void handleGroupPart(File cthreeFile, File tmpDir, int numThreads,
+      int start, int end) {
     HashMap<String, CommitPairIdentifier> cpis = new HashMap<>();
     HashMap<CommitPairIdentifier, String> cpisIds = new HashMap<>();
     ArrayList<ChangeGroup> groups = new ArrayList<>();
