@@ -84,6 +84,7 @@ public class TransformDeclarationChildrenChanges extends AbstractFilterRule {
         if (ep.getUnchangedOrOldParentNode().getTag() == BastDeclaration.TAG) {
           if (ep.getOldOrInsertedNode().getTag() == BastIdentDeclarator.TAG) {
             if (((BastIdentDeclarator) ep.getOldOrInsertedNode()) != null
+                && ((BastIdentDeclarator) ep.getOldOrInsertedNode()).expression != null
                 && ((BastIdentDeclarator) ep.getOldOrInsertedNode()).expression
                     .getTag() == BastExprInitializer.TAG) {
               if (((BastExprInitializer) ((BastIdentDeclarator) ep
