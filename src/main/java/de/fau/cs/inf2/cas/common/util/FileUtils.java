@@ -39,6 +39,12 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class FileUtils {
   /**
@@ -234,6 +240,34 @@ public class FileUtils {
       }
     } catch (IOException ioe) {
       ioe.printStackTrace();
+    }
+  }
+  
+  public static void deleteTmpDirectory(String path) {
+    if (!path.startsWith("/tmp")) {
+      System.err.println("Unknown temporary directory. Skipping delete directory.");
+      return;
+    }
+    Path directory = Paths.get(path);
+    if (!directory.toFile().exists()) {
+      return;
+    }
+    try {
+      Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+         @Override
+         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+             Files.delete(file);
+             return FileVisitResult.CONTINUE;
+         }
+
+         @Override
+         public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+             Files.delete(dir);
+             return FileVisitResult.CONTINUE;
+         }
+      });
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 }
