@@ -97,6 +97,10 @@ public class ExtendedTemplateExtractor {
     } catch (Exception e) {
       e.printStackTrace();
       return null;
+    } finally {
+      if (executor == null) {
+        treeDif.shutdown();
+      }
     }
     return exDiff;
   }
