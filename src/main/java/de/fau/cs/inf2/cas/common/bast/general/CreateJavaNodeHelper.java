@@ -41,14 +41,17 @@ import de.fau.cs.inf2.cas.common.bast.nodes.AbstractBastStatement;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastAccess;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastAdditiveExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastAnd;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastAnnotation;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastArrayRef;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastAsgnExpr;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastAssertStmt;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastBlock;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastBoolConst;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastBreak;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastCall;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastCastExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastCatchClause;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastClassConst;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastClassDecl;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastCmp;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastCondAnd;
@@ -861,6 +864,9 @@ public class CreateJavaNodeHelper {
         case BastListInitializer.TAG:
         case AresBlock.TAG:
         case BastSwitch.TAG:
+        case BastAnnotation.TAG:
+        case BastClassConst.TAG:
+        case BastAssertStmt.TAG:
           continueLoop = false;
           break;
         case BastIncrExpr.TAG:
@@ -881,7 +887,6 @@ public class CreateJavaNodeHelper {
         case BastTypeSpecifier.TAG:
           node = ((BastTypeSpecifier) node).type;
           break;
-
         default:
           assert (false);
           continueLoop = false;
