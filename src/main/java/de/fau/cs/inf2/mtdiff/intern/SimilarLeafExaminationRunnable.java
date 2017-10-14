@@ -85,6 +85,8 @@ public class SimilarLeafExaminationRunnable implements Callable<Set<MatchingCand
   private IdentityHashMap<INode, String> stringMap;
   private int numThreads;
   private TreeMatcherConfiguration configuration;
+  private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache;
+  private IdentityHashMap<INode, Integer> quickFindHashMap;
 
   /**
    * Instantiates a new similar leaf examination runnable.
@@ -120,6 +122,8 @@ public class SimilarLeafExaminationRunnable implements Callable<Set<MatchingCand
     this.stringMap = parameterObject.stringMap;
     this.numThreads = parameterObject.numThreads;
     this.configuration = parameterObject.configuration;
+    this.hashbasedCache = parameterObject.hashbasedCache;
+    this.quickFindHashMap = parameterObject.quickFindHashMap;
   }
 
 
@@ -167,7 +171,7 @@ public class SimilarLeafExaminationRunnable implements Callable<Set<MatchingCand
           candidateMap, foundMaxArray, similarityCache, similarityEntries, parents1, parents2,
           leavesMap1, leavesMap2, labelConfiguration, leafMatcher, directChildrenMap1,
           directChildrenMap2, root1, root2, weightSimilarity, weightPosition, stringMap, verbose,
-          numThreads, configuration)).call();
+          numThreads, hashbasedCache, quickFindHashMap, configuration)).call();
 
       resultList.addAll(initialList);
       count.decrementAndGet();

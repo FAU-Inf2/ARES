@@ -83,6 +83,9 @@ class SimilarityMatrixHelper {
   private int numThreads;
   private TreeMatcherConfiguration configuration;
 
+  private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache;
+  private IdentityHashMap<INode, Integer> quickFindHashMap;
+  
   /**
    * Instantiates a new restructured tree diff helper runnable.
    * 
@@ -120,6 +123,8 @@ class SimilarityMatrixHelper {
     this.stringMap = parameterObject.stringMap;
     this.numThreads = parameterObject.numThreads;
     this.configuration = parameterObject.configuration;
+    this.hashbasedCache = parameterObject.hashbasedCache;
+    this.quickFindHashMap = parameterObject.quickFindHashMap;
   }
 
   private ArrayList<INode> oldNodes;
@@ -369,13 +374,13 @@ class SimilarityMatrixHelper {
       updateSimilarityRow(new UpdateSimilarityRowParameter(aggregationFinished, similarityScores,
           firstAggregations, secondAggregations, currentResultMap, changed, 0, newNodes,
           onlyOneClassPair, resultMap, stringSim, stringSimCache, similarityCache,
-          similarityEntries, stringMap, verbose));
+          similarityEntries, stringMap, verbose, hashbasedCache, quickFindHashMap));
     }
     for (int i = 1; i < oldNodes.size(); i++) {
       updateSimilarityRow(new UpdateSimilarityRowParameter(aggregationFinished, similarityScores,
           firstAggregations, secondAggregations, currentResultMap, changed, i, newNodes,
           onlyOneClassPair, resultMap, stringSim, stringSimCache, similarityCache,
-          similarityEntries, stringMap, verbose));
+          similarityEntries, stringMap, verbose, hashbasedCache, quickFindHashMap));
     }
   }
 
@@ -504,7 +509,18 @@ class SimilarityMatrixHelper {
               similarity = 0.0f;
 
             } else {
-              if (leavesMap1.get(firstAggregation.getAssociatedTree()).size()
+              final Integer firstHash = parameterObject.quickFindHashMap.get(firstAggregation.getAssociatedTree());
+              ConcurrentHashMap<Integer, Float> singleMap =
+                  parameterObject.hashbasedCache.get(firstHash);
+              if (singleMap == null) {
+                singleMap = new ConcurrentHashMap<>();
+                parameterObject.hashbasedCache.put(firstHash, singleMap);
+              }
+              final Integer secondHash = parameterObject.quickFindHashMap.get(secondAggregation.getAssociatedTree());
+              if (singleMap.containsKey(secondHash)) {
+                similarity =
+                    (float) (singleMap.get(secondHash));
+              } else if (leavesMap1.get(firstAggregation.getAssociatedTree()).size()
                   * leavesMap2.get(secondAggregation.getAssociatedTree()).size() > 10000) {
 
                 if (map != null) {
@@ -517,6 +533,8 @@ class SimilarityMatrixHelper {
                         parameterObject.onlyOneClassPair, parameterObject.resultMap,
                         parameterObject.stringSim, parameterObject.currentResultMap,
                         parameterObject.verbose);
+                    singleMap.put(secondHash, similarity);
+
                     if (parameterObject.similarityEntries
                         .get() < TreeMatcher.SIMILIARITY_CACHE_SIZE) {
                       map.put(secondAggregation.getAssociatedTree(), similarity);
@@ -530,6 +548,8 @@ class SimilarityMatrixHelper {
                       parameterObject.onlyOneClassPair, parameterObject.resultMap,
                       parameterObject.stringSim, parameterObject.currentResultMap,
                       parameterObject.verbose);
+                  singleMap.put(secondHash, similarity);
+
                   if (parameterObject.similarityEntries
                       .get() < TreeMatcher.SIMILIARITY_CACHE_SIZE) {
                     parameterObject.similarityCache.put(firstAggregation.getAssociatedTree(), tmp);
@@ -543,6 +563,8 @@ class SimilarityMatrixHelper {
                     parameterObject.onlyOneClassPair, parameterObject.resultMap,
                     parameterObject.stringSim, parameterObject.currentResultMap,
                     parameterObject.verbose);
+                //singleMap.put(secondHash, similarity);
+
               }
 
             }
@@ -815,7 +837,7 @@ class SimilarityMatrixHelper {
         updateSimilarityRow(new UpdateSimilarityRowParameter(aggregationFinished, similarityScores,
             firstAggregations, secondAggregations, currentResultMap, changed, i, newNodes,
             onlyOneClassPair, resultMap, stringSim, stringSimCache, similarityCache,
-            similarityEntries, stringMap, verbose));
+            similarityEntries, stringMap, verbose, hashbasedCache, quickFindHashMap));
       }
       workerCounter.decrementAndGet();
     }

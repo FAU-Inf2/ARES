@@ -65,7 +65,7 @@ public class MatchLeavesParameter {
   public HashMap<String, String> renames;
   public IdentityHashMap<INode, String> stringMap;
   public boolean verbose;
-
+  public IdentityHashMap<INode, Integer> quickFindHashMap;
   /**
    * Instantiates a new match leaves parameter.
    *
@@ -103,7 +103,8 @@ public class MatchLeavesParameter {
       Map<INode, ArrayList<INode>> leavesMap1, Map<INode, ArrayList<INode>> leavesMap2,
       Map<INode, ArrayList<INode>> directChildrenMap1,
       Map<INode, ArrayList<INode>> directChildrenMap2, HashMap<String, String> renames,
-      IdentityHashMap<INode, String> stringMap, boolean verbose) {
+      IdentityHashMap<INode, String> stringMap, boolean verbose,
+      IdentityHashMap<INode, Integer> quickFindHashMap) {
     this.orderedList1 = orderedList1;
     this.orderedList2 = orderedList2;
     this.matchedLeaves = matchedLeaves;
@@ -126,5 +127,6 @@ public class MatchLeavesParameter {
     this.renames = renames;
     this.stringMap = stringMap;
     this.verbose = verbose;
+    this.quickFindHashMap = quickFindHashMap;
   }
 }

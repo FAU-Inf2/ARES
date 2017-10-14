@@ -69,7 +69,8 @@ public class SimilarLeafExaminationRunnableParameter {
   public boolean verbose;
   public int numThreads;
   public TreeMatcherConfiguration configuration;
-
+  public ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache;
+  public IdentityHashMap<INode, Integer> quickFindHashMap;
   /**
    * Instantiates a new similar leaf examination runnable parameter.
    *
@@ -115,7 +116,10 @@ public class SimilarLeafExaminationRunnableParameter {
       Map<INode, ArrayList<INode>> directChildrenMap1,
       Map<INode, ArrayList<INode>> directChildrenMap2, INode root1, INode root2,
       double weightSimilarity, double weightPosition, IdentityHashMap<INode, String> stringMap,
-      boolean verbose, int numThreads, TreeMatcherConfiguration configuration) {
+      boolean verbose, int numThreads, 
+      ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache,
+      IdentityHashMap<INode, Integer> quickFindHashMap,
+      TreeMatcherConfiguration configuration) {
     this.oldNodes = oldNodes;
     this.newNodes = newNodes;
     this.initialListOld = initialListOld;
@@ -142,6 +146,8 @@ public class SimilarLeafExaminationRunnableParameter {
     this.stringMap = stringMap;
     this.verbose = verbose;
     this.numThreads = numThreads;
+    this.hashbasedCache = hashbasedCache;
     this.configuration = configuration;
+    this.quickFindHashMap = quickFindHashMap;
   }
 }
