@@ -487,8 +487,6 @@ public class CthreeProcessing {
         tmpDir = Files.createTempDirectory(null).toFile();
         final File revDir = createRevisionFiles(tmpDir, repository, revisionBefore);
 
-        final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-
         final AresMeasurement measurement = new AresMeasurement();
         ArrayList<ReadableEncodedScript> inputs = new ArrayList<>(2);
         for (String scriptId : group.getMembers()) {
@@ -513,7 +511,7 @@ public class CthreeProcessing {
 
 
         SearchForCodeLocationsParameter parameterObject = new SearchForCodeLocationsParameter(
-            oldestId, repositoryName, revDir, executor, measurement, inputs, inputs,
+            oldestId, repositoryName, revDir, executioner, measurement, inputs, inputs,
             methodSignatureMap, methodBlockMap, filesArray, createTime, group, workDir);
         searchForCodeLocations(parameterObject);
         if (parameterObject.searchTime != null) {
@@ -530,7 +528,6 @@ public class CthreeProcessing {
         parameterObject.searchTime = null;
         parameterObject.searchTime = aresMapper.readValue(outputSearch, AresSearchTime.class);
         assert (parameterObject.searchTime != null);
-        executor.shutdown();
       }
     } catch (Throwable e) {
       return;
