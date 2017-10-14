@@ -452,6 +452,7 @@ public class CthreeProcessing {
       HashMap<String, VcsRepository> repositories, File repoDir, int numThreads, long createTime) {
     final File outputFile = new File(workDir, "/recall_result.json");
     File outputSearch = new File(workDir, "/time_search.json");
+    File tmpDir = null;
     if (outputFile.exists() && outputSearch.exists()) {
       return;
     }
@@ -483,7 +484,7 @@ public class CthreeProcessing {
 
         GitRepository repository = (GitRepository) repositories.get(repositoryName);
         GitRevision revisionBefore = (GitRevision) repository.searchCommit(oldestId);
-        File tmpDir = Files.createTempDirectory(null).toFile();
+        tmpDir = Files.createTempDirectory(null).toFile();
         final File revDir = createRevisionFiles(tmpDir, repository, revisionBefore);
 
         final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
@@ -533,6 +534,10 @@ public class CthreeProcessing {
       }
     } catch (Throwable e) {
       return;
+    } finally {
+      if (tmpDir != null && tmpDir.exists()) {
+        FileUtils.deleteTmpDirectory(tmpDir.getAbsolutePath());
+      }
     }
     return;
   }
