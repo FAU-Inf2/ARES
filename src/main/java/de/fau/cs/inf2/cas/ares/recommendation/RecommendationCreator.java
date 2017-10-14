@@ -450,6 +450,7 @@ public class RecommendationCreator {
     int positionProgram = 0;
     NodeParentInformationHierarchy startHierarchy = programParents.get(start);
     template.patternStart = startHierarchy.list.get(0).parent;
+    template.patternStartFieldId = startHierarchy.list.get(0).fieldConstant;
     template.patternStartListIdOld = startHierarchy.list.get(0).listId;
     HashSet<WildcardInstance> allowReset = new HashSet<>();
     boolean done = false;
