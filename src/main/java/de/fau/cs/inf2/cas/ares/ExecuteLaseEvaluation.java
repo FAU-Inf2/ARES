@@ -47,7 +47,6 @@ import de.fau.cs.inf2.cas.ares.recommendation.Recommendation;
 import de.fau.cs.inf2.cas.ares.recommendation.RecommendationCreator;
 import de.fau.cs.inf2.cas.ares.recommendation.extension.ExtendedTemplateExtractor;
 import de.fau.cs.inf2.cas.ares.recommendation.visitors.FindInitialPatternStartsVisitor;
-import de.fau.cs.inf2.cas.ares.recommendation.visitors.FindSpecialPatternStartsVisitor;
 
 import de.fau.cs.inf2.cas.common.bast.nodes.AbstractBastNode;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastBlock;
