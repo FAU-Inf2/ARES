@@ -78,5 +78,19 @@ public class BastAssertStmt extends AbstractBastStatement {
   public int getTag() {
     return TAG;
   }
+  
+  public void replaceField(BastFieldConstants field, BastField fieldValue) {
+    fieldMap.put(field, fieldValue);
+    switch (field) {
+      case ASSERT_STMT_FIRST_ASSERT:
+        this.firstAssert = (AbstractBastExpr) fieldValue.getField();
+      case ASSERT_STMT_SECOND_ASSERT:
+        this.secondAssert = (AbstractBastExpr) fieldValue.getField();
+        break;
+      default:
+        assert (false);
+
+    }
+  }
 
 }
