@@ -39,6 +39,7 @@ import de.fau.cs.inf2.cas.ares.recommendation.ExtendedAresPattern;
 import de.fau.cs.inf2.cas.ares.recommendation.Recommendation;
 import de.fau.cs.inf2.cas.ares.recommendation.RecommendationCreator;
 import de.fau.cs.inf2.cas.ares.recommendation.extension.ExtendedTemplateExtractor;
+import de.fau.cs.inf2.cas.ares.recommendation.visitors.FindInitialPatternStartsVisitor;
 import de.fau.cs.inf2.cas.ares.recommendation.visitors.FindSpecialPatternStartsVisitor;
 
 import de.fau.cs.inf2.cas.common.bast.nodes.AbstractBastNode;
@@ -597,8 +598,8 @@ public class CthreeProcessing {
             new de.fau.cs.inf2.cas.ares.recommendation.visitors.CountNodesVisitor();
         testProgTmp.accept(countVisitor);
 
-        FindSpecialPatternStartsVisitor starts = new FindSpecialPatternStartsVisitor(
-            outerTemplate.originalAst.block.statements.getFirst(), outerTemplate);
+        FindInitialPatternStartsVisitor starts = new FindInitialPatternStartsVisitor(
+            outerTemplate.originalAst.block.statements, outerTemplate);
         testProgTmp.accept(starts);
         if (starts.starts.size() == 0) {
           continue;
