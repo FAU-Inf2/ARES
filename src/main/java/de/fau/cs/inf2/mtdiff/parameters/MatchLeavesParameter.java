@@ -66,6 +66,7 @@ public class MatchLeavesParameter {
   public IdentityHashMap<INode, String> stringMap;
   public boolean verbose;
   public IdentityHashMap<INode, Integer> quickFindHashMap;
+  
   /**
    * Instantiates a new match leaves parameter.
    *

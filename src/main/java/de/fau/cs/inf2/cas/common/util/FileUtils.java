@@ -1,23 +1,20 @@
 /*
  * Copyright (c) 2017 Programming Systems Group, CS Department, FAU
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 
@@ -62,7 +59,7 @@ public class FileUtils {
       System.err.println(String.format("Error: Cannot create directory \"%s\"!", dir.toString()));
     }
   }
-  
+
   /**
    * Clone repository.
    *
@@ -84,7 +81,7 @@ public class FileUtils {
     }
     return null;
   }
-  
+
   /**
    * Open repository.
    *
@@ -102,7 +99,7 @@ public class FileUtils {
 
     return null;
   }
-  
+
   /**
    * Write exception.
    *
@@ -111,8 +108,7 @@ public class FileUtils {
    * @param args the args
    * @return the string
    */
-  public static String writeException(String filenamePrefix, Throwable throwable,
-       String... args) {
+  public static String writeException(String filenamePrefix, Throwable throwable, String... args) {
     StringBuilder sb = new StringBuilder();
     for (String a : args) {
       sb.append(a + "\n");
@@ -128,13 +124,12 @@ public class FileUtils {
     String filename;
     do {
       filename = filenamePrefix + "_" + System.currentTimeMillis() + "_" + num + ".txt";
-    }
-    while (new File(filename).exists());
+    } while (new File(filename).exists());
 
     FileUtils.append(filename, sb.toString());
     return filename;
   }
-  
+
   /**
    * Append.
    *
@@ -160,7 +155,7 @@ public class FileUtils {
       }
     }
   }
-  
+
   /**
    * Gets the file contents.
    *
@@ -181,7 +176,7 @@ public class FileUtils {
     inStream.close();
     return outStream.toByteArray();
   }
-  
+
   /**
    * Gets the file data.
    *
@@ -220,7 +215,7 @@ public class FileUtils {
     }
     return new String(buffer);
   }
-  
+
   /**
    * Write string to file.
    *
@@ -242,7 +237,12 @@ public class FileUtils {
       ioe.printStackTrace();
     }
   }
-  
+
+  /**
+   * Delete tmp directory.
+   *
+   * @param path the path
+   */
   public static void deleteTmpDirectory(String path) {
     if (!path.startsWith("/tmp")) {
       System.err.println("Unknown temporary directory. Skipping delete directory.");
@@ -254,17 +254,17 @@ public class FileUtils {
     }
     try {
       Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-         @Override
-         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-             Files.delete(file);
-             return FileVisitResult.CONTINUE;
-         }
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+          Files.delete(file);
+          return FileVisitResult.CONTINUE;
+        }
 
-         @Override
-         public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-             Files.delete(dir);
-             return FileVisitResult.CONTINUE;
-         }
+        @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+          Files.delete(dir);
+          return FileVisitResult.CONTINUE;
+        }
       });
     } catch (IOException e) {
       e.printStackTrace();

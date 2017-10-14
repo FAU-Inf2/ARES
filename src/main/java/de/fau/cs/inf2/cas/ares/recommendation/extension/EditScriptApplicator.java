@@ -262,18 +262,19 @@ public class EditScriptApplicator {
       foundPatternList.addAll(template.patternStartListIdOld, block.statements);
     }
     if (template.patternStartFieldId.isList) {
-    template.patternStart.replaceField(template.patternStartFieldId,
-        new BastField(foundPatternList));
+      template.patternStart.replaceField(template.patternStartFieldId,
+          new BastField(foundPatternList));
     } else {
       if (foundPatternList.size() == 1) {
-        //template.patternStart.replaceField(template.patternStartFieldId,
-        //    new BastField(foundPatternList.get(0)));
+        // template.patternStart.replaceField(template.patternStartFieldId,
+        // new BastField(foundPatternList.get(0)));
       } else {
         LinkedList<AbstractBastStatement> stmts = new LinkedList<>();
         for (AbstractBastNode node : foundPatternList) {
           stmts.add((AbstractBastStatement) node);
         }
-        BastBlock replacementBlock = CreateJavaNodeHelper.createBlock(template.patternStart.info.tokens[0], stmts);
+        BastBlock replacementBlock =
+            CreateJavaNodeHelper.createBlock(template.patternStart.info.tokens[0], stmts);
         template.patternStart.replaceField(template.patternStartFieldId,
             new BastField(replacementBlock));
       }
@@ -1023,7 +1024,7 @@ public class EditScriptApplicator {
   }
 
   private static void applyUpdateToFor(UpdateOperation uop, AbstractBastNode oldFoundNode) {
-    //TODO
+    // TODO
     assert (false);
   }
 
@@ -1410,7 +1411,7 @@ public class EditScriptApplicator {
 
       String keyName = AresWrapper.staticGetValue(entry.getKey());
       String valueName = AresWrapper.staticGetValue(entry.getValue());
-      if ((keyName != null && !keyName.equals("")) 
+      if ((keyName != null && !keyName.equals(""))
           || (valueName != null && !valueName.equals(""))) {
         if (!keyName.equals(valueName)) {
           HashSet<String> toRemoveSet = toRemoveMap.get(entry.getKey().getTag());

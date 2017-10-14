@@ -91,6 +91,11 @@ import java.util.concurrent.TimeUnit;
 public class CthreeForkedProcessing {
   public static final int MAX_INPUT_SIZE = 20;
 
+  /**
+   * The main method.
+   *
+   * @param args the arguments
+   */
   public static void main(String[] args) {
     ObjectMapper aresMapper = AresMapper.createJsonMapper();
 
@@ -115,20 +120,6 @@ public class CthreeForkedProcessing {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-
-
-  }
-
-  /**
-   * Handle group part.
-   *
-   * @param cthreeFile the cthree file
-   * @param tmpDir the tmp dir
-   * @param numThreads the num threads
-   */
-  public static void handleGroupPart(File cthreeFile, File tmpDir, int numThreads,
-      boolean skipErrors) {
-    handleGroupPart(cthreeFile, tmpDir, numThreads, -1, -1, skipErrors);
   }
 
   /**
@@ -216,13 +207,13 @@ public class CthreeForkedProcessing {
       }
       String[] args = new String[5];
 
-        args[0] = cpiData.getAbsolutePath();
-        args[1] = tmpDir.getAbsolutePath();
-        args[2] = String.valueOf(numThreads);
-        args[3] = repoDir.getAbsolutePath();
-        args[4] = String.valueOf(skipErrors);
-        executeWithProcess(args);
-        //main(args);
+      args[0] = cpiData.getAbsolutePath();
+      args[1] = tmpDir.getAbsolutePath();
+      args[2] = String.valueOf(numThreads);
+      args[3] = repoDir.getAbsolutePath();
+      args[4] = String.valueOf(skipErrors);
+      executeWithProcess(args);
+      // main(args);
 
     }
   }
@@ -268,7 +259,7 @@ public class CthreeForkedProcessing {
     }
   }
 
-  public static void executeWithProcess(String[] args) {
+  private static void executeWithProcess(String[] args) {
     final Process process = execute(CthreeForkedProcessing.class, args);
 
     try {
@@ -293,7 +284,7 @@ public class CthreeForkedProcessing {
   }
 
 
-  public static void executeSingleGroup(ChangeGroup group, File tmpDir, int numThreads,
+  private static void executeSingleGroup(ChangeGroup group, File tmpDir, int numThreads,
       HashMap<String, CommitPairIdentifier> cpis, File repoDir, boolean skipErrors) {
     HashMap<String, VcsRepository> repositories = new HashMap<>();
     String groupHash = group.getHash();
@@ -302,8 +293,8 @@ public class CthreeForkedProcessing {
     try {
       File folder = new File(tmpDir.getAbsolutePath() + "/results/" + groupHash + "/");
       if (!folder.exists()) {
-          System.err.println("Folder does not exist!");
-          return;
+        System.err.println("Folder does not exist!");
+        return;
       }
       long createTime = CthreeProcessing.generalizeGroup(group, executioner, innerExecutioner,
           folder, cpis, repositories, repoDir);

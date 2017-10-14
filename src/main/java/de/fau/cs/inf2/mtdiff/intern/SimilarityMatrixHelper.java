@@ -1,23 +1,20 @@
 /*
  * Copyright (c) 2017 Programming Systems Group, CS Department, FAU
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 
@@ -85,7 +82,7 @@ class SimilarityMatrixHelper {
 
   private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache;
   private IdentityHashMap<INode, Integer> quickFindHashMap;
-  
+
   /**
    * Instantiates a new restructured tree diff helper runnable.
    * 
@@ -509,17 +506,15 @@ class SimilarityMatrixHelper {
               similarity = 0.0f;
 
             } else {
-              final Integer firstHash = parameterObject.quickFindHashMap.get(firstAggregation.getAssociatedTree());
-              ConcurrentHashMap<Integer, Float> singleMap =
-                  parameterObject.hashbasedCache.get(firstHash);
-              if (singleMap == null) {
-                singleMap = new ConcurrentHashMap<>();
-                parameterObject.hashbasedCache.put(firstHash, singleMap);
-              }
-              final Integer secondHash = parameterObject.quickFindHashMap.get(secondAggregation.getAssociatedTree());
+              final Integer firstHash =
+                  parameterObject.quickFindHashMap.get(firstAggregation.getAssociatedTree());
+              ConcurrentHashMap<Integer, Float> singleMap = new ConcurrentHashMap<>();
+              hashbasedCache.putIfAbsent(firstHash, singleMap);
+              singleMap = hashbasedCache.get(firstHash);
+              final Integer secondHash =
+                  parameterObject.quickFindHashMap.get(secondAggregation.getAssociatedTree());
               if (singleMap.containsKey(secondHash)) {
-                similarity =
-                    (float) (singleMap.get(secondHash));
+                similarity = (float) (singleMap.get(secondHash));
               } else if (leavesMap1.get(firstAggregation.getAssociatedTree()).size()
                   * leavesMap2.get(secondAggregation.getAssociatedTree()).size() > 10000) {
 
@@ -563,7 +558,7 @@ class SimilarityMatrixHelper {
                     parameterObject.onlyOneClassPair, parameterObject.resultMap,
                     parameterObject.stringSim, parameterObject.currentResultMap,
                     parameterObject.verbose);
-                //singleMap.put(secondHash, similarity);
+                // singleMap.put(secondHash, similarity);
 
               }
 

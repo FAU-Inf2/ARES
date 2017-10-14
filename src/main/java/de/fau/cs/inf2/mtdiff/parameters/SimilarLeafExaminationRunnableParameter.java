@@ -71,6 +71,7 @@ public class SimilarLeafExaminationRunnableParameter {
   public TreeMatcherConfiguration configuration;
   public ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache;
   public IdentityHashMap<INode, Integer> quickFindHashMap;
+  
   /**
    * Instantiates a new similar leaf examination runnable parameter.
    *
