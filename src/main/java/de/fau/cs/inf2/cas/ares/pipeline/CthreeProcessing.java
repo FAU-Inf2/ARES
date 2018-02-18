@@ -108,6 +108,8 @@ public class CthreeProcessing {
    * @param cthreeFile the cthree file
    * @param tmpDir the tmp dir
    * @param numThreads the num threads
+   * @param start number of the group to start the computation
+   * @param end number of the last group to compute
    */
   public static void handleGroupPart(File cthreeFile, File tmpDir, int numThreads,
       int start, int end) {
