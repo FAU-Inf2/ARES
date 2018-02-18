@@ -40,12 +40,12 @@ public class Statistics {
   public static Double getUpperQuartile(List<Long> values) {
     Double upperQuartile;
     if (values.size() % 2 == 0) {
-      upperQuartile = (double) values.size() / 2 == 0
+      upperQuartile = ((double) values.size() / 2) % 2 == 0
           ? ((double) values.get(values.size() / 2 / 2 + values.size() / 2)
               + values.get(values.size() / 2 / 2 + 1 + values.size() / 2)) / 2
           : (double) values.get(values.size() / 2 / 2 + 1 + values.size() / 2);
     } else {
-      upperQuartile = (double) (values.size() - 1) / 2 == 0
+      upperQuartile = ((double) (values.size() - 1) / 2) % 2 == 0
           ? ((double) values.get((values.size() - 1) / 2 / 2 + values.size() / 2 + 1)
               + values.get((values.size() - 1) / 2 / 2 + 1 + values.size() / 2 + 1)) / 2
           : (double) values.get((values.size() - 1) / 2 / 2 + 1 + values.size() / 2 + 1);
@@ -62,12 +62,12 @@ public class Statistics {
   public static Double getLowerQuartile(List<Long> values) {
     Double lowerQuartile;
     if (values.size() % 2 == 0) {
-      lowerQuartile = (double) values.size() / 2 == 0
+      lowerQuartile = ((double) values.size() / 2) % 2 == 0
           ? ((double) values.get(values.size() / 2 / 2) + values.get(values.size() / 2 / 2 + 1)) / 2
           : (double) values.get(values.size() / 2 / 2 + 1);
 
     } else {
-      lowerQuartile = (double) (values.size() - 1) / 2 == 0
+      lowerQuartile = ((double) (values.size() - 1) / 2) % 2 == 0
           ? ((double) values.get((values.size() - 1) / 2 / 2)
               + values.get((values.size() - 1) / 2 / 2 + 1)) / 2
           : (double) values.get((values.size() - 1) / 2 / 2 + 1);
@@ -87,5 +87,20 @@ public class Statistics {
         ? ((double) values.get(values.size() / 2) + values.get(values.size() / 2 + 1)) / 2
         : (double) values.get(values.size() / 2 + 1);
     return median;
+  }
+
+  /**
+   * Creates the mean.
+   *
+   * @param values the values
+   * @return the double
+   */
+  public static Double getMean(List<Long> values) {
+    long sum = 0;
+    for (Long value : values) {
+      sum += value;
+    }
+    final Double mean = (((double)sum) / values.size());
+    return mean;
   }
 }

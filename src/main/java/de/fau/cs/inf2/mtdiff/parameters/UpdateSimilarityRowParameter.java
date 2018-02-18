@@ -54,6 +54,8 @@ public class UpdateSimilarityRowParameter {
   public AtomicLong similarityEntries;
   public IdentityHashMap<INode, String> stringMap;
   public boolean verbose;
+  public ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache;
+  public IdentityHashMap<INode, Integer> quickFindHashMap;
 
   /**
    * Instantiates a new update similarity row parameter.
@@ -83,7 +85,9 @@ public class UpdateSimilarityRowParameter {
       IdentityHashMap<INode, ComparePair<INode>> resultMap, NGramCalculator stringSim,
       ConcurrentHashMap<String, Float> stringSimCache,
       ConcurrentHashMap<INode, ConcurrentHashMap<INode, Float>> similarityCache,
-      AtomicLong similarityEntries, IdentityHashMap<INode, String> stringMap, boolean verbose) {
+      AtomicLong similarityEntries, IdentityHashMap<INode, String> stringMap, boolean verbose,
+      ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache,
+      IdentityHashMap<INode, Integer> quickFindHashMap) {
     this.aggregationFinisheds = aggregationFinisheds;
     this.similarityScores = similarityScores;
     this.firstAggregations = firstAggregations;
@@ -100,5 +104,7 @@ public class UpdateSimilarityRowParameter {
     this.similarityEntries = similarityEntries;
     this.stringMap = stringMap;
     this.verbose = verbose;
+    this.hashbasedCache = hashbasedCache;
+    this.quickFindHashMap = quickFindHashMap;
   }
 }

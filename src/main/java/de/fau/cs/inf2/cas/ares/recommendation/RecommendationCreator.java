@@ -1,23 +1,20 @@
 /*
  * Copyright (c) 2017 Programming Systems Group, CS Department, FAU
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 
@@ -32,8 +29,10 @@ import de.fau.cs.inf2.cas.ares.bast.nodes.AresUseStmt;
 import de.fau.cs.inf2.cas.ares.bast.nodes.AresWildcard;
 import de.fau.cs.inf2.cas.ares.bast.visitors.NodeStreamVisitor;
 import de.fau.cs.inf2.cas.ares.io.AresMeasurement;
+import de.fau.cs.inf2.cas.ares.pcreation.WildcardAccessHelper;
 import de.fau.cs.inf2.cas.ares.recommendation.extension.EditScriptApplicator;
 import de.fau.cs.inf2.cas.ares.recommendation.extension.ExtendedTemplateExtractor;
+import de.fau.cs.inf2.cas.ares.recommendation.visitors.FindInitialPatternStartsVisitor;
 import de.fau.cs.inf2.cas.ares.recommendation.visitors.FindSpecialPatternStartsVisitor;
 import de.fau.cs.inf2.cas.ares.recommendation.visitors.GetChildrenMapVisitor;
 
@@ -43,6 +42,7 @@ import de.fau.cs.inf2.cas.common.bast.general.NodeParentInformationHierarchy;
 import de.fau.cs.inf2.cas.common.bast.nodes.AbstractBastNode;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastBlock;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastCall;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastEmptyStmt;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastFunction;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastIf;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastNameIdent;
@@ -208,8 +208,8 @@ public class RecommendationCreator {
         || template.originalAst.block.statements.size() == 0) {
       return null;
     }
-    FindSpecialPatternStartsVisitor starts = new FindSpecialPatternStartsVisitor(
-        template.originalAst.block.statements.getFirst(), template);
+    FindInitialPatternStartsVisitor starts =
+        new FindInitialPatternStartsVisitor(template.originalAst.block.statements, template);
     testProg.accept(starts);
     GetChildrenMapVisitor gcmvProg = new GetChildrenMapVisitor();
     testProg.accept(gcmvProg);
@@ -273,8 +273,8 @@ public class RecommendationCreator {
             AresExtension.NO_EXTENSIONS);
         countVisitor = new de.fau.cs.inf2.cas.ares.recommendation.visitors.CountNodesVisitor();
         testProg.accept(countVisitor);
-        starts = new FindSpecialPatternStartsVisitor(
-            template.originalAst.block.statements.getFirst(), template);
+        starts =
+            new FindInitialPatternStartsVisitor(template.originalAst.block.statements, template);
         testProg.accept(starts);
         gcmvProg = new GetChildrenMapVisitor();
         testProg.accept(gcmvProg);
@@ -419,11 +419,38 @@ public class RecommendationCreator {
     HashMap<CompareNodesResult, WildcardInstance> resetTowildcardMap = new HashMap<>();
     HashMap<AresWildcard, WildcardInstance> wildcardMap = new HashMap<>();
     HashMap<AbstractBastNode, WildcardInstance> nodesToAssociatedWildcard = new HashMap<>();
+    HashMap<AresWildcard, LinkedList<AbstractBastNode>> requiredNodesMap = new HashMap<>();
 
+    FindNodesFromTagVisitor fnft = new FindNodesFromTagVisitor(AresWildcard.TAG);
+    template.originalAst.accept(fnft);
+    for (AbstractBastNode node : fnft.nodes) {
+      if (WildcardAccessHelper.isExprWildcard(node)) {
+        continue;
+      }
+      NodeParentInformationHierarchy npiTemplate = templateParents.get(node);
+      if (npiTemplate != null && npiTemplate.list != null && npiTemplate.list.size() > 0) {
+        NodeParentInformation np = npiTemplate.list.get(0);
+        if (np.fieldConstant.isList) {
+          @SuppressWarnings("unchecked")
+          LinkedList<AbstractBastNode> nodes =
+              (LinkedList<AbstractBastNode>) np.parent.getField(np.fieldConstant).getListField();
+          LinkedList<AbstractBastNode> requiredNodes = new LinkedList<>();
+          for (int i = np.listId + 1; i < nodes.size(); i++) {
+            if (WildcardAccessHelper.isWildcard(nodes.get(i))
+                || nodes.get(i).getTag() == BastEmptyStmt.TAG) {
+              continue;
+            }
+            requiredNodes.add(nodes.get(i));
+          }
+          requiredNodesMap.put((AresWildcard) node, requiredNodes);
+        }
+      }
+    }
     int positionTemplate = 0;
     int positionProgram = 0;
     NodeParentInformationHierarchy startHierarchy = programParents.get(start);
     template.patternStart = startHierarchy.list.get(0).parent;
+    template.patternStartFieldId = startHierarchy.list.get(0).fieldConstant;
     template.patternStartListIdOld = startHierarchy.list.get(0).listId;
     HashSet<WildcardInstance> allowReset = new HashSet<>();
     boolean done = false;
@@ -483,8 +510,7 @@ public class RecommendationCreator {
                 ArrayList<AbstractBastNode> associatedChildren =
                     templateChildrenMap.get(startAssociationNode);
                 int index = templateStream.indexOf(startAssociationNode);
-                if (positionProgram == 0
-                    && associatedChildren != null
+                if (positionProgram == 0 && associatedChildren != null
                     && index + associatedChildren.size() + 1 < templateStream.size()
                     && templateStream.get(index + associatedChildren.size() + 1)
                         .getTag() == AresWildcard.TAG) {
@@ -554,19 +580,19 @@ public class RecommendationCreator {
               case CompareNodesResult.WILDCARD_ACCEPT:
                 int offset = 1;
                 childlist = templateChildrenMap.get(wildcard);
-
+                LinkedList<AbstractBastNode> requiredNodes = requiredNodesMap.get(wildcard);
                 childlist = createReset(templateChildrenMap, wildcardResets, resetTowildcardMap,
                     positionTemplate, positionProgram, wildcard, instance, offset, programStream,
-                    templateStream);
+                    templateStream, requiredNodes, programParents);
                 if (positionTemplate + childlist.size() + offset < templateStream.size()
                     && templateStream.get(positionTemplate + childlist.size() + offset)
                         .getTag() == BastSwitchCaseGroup.TAG) {
                   childlist = createReset(templateChildrenMap, wildcardResets, resetTowildcardMap,
                       positionTemplate, positionProgram, wildcard, instance, offset + 1,
-                      programStream, templateStream);
+                      programStream, templateStream, requiredNodes, programParents);
                   childlist = createReset(templateChildrenMap, wildcardResets, resetTowildcardMap,
                       positionTemplate, positionProgram - instance.nodes.size(), wildcard, instance,
-                      offset + 1, programStream, templateStream);
+                      offset + 1, programStream, templateStream, requiredNodes, programParents);
                 }
                 positionProgram++;
 
@@ -802,7 +828,9 @@ public class RecommendationCreator {
       LinkedList<CompareNodesResult> wildcardResets,
       HashMap<CompareNodesResult, WildcardInstance> resetTowildcardMap, int positionTemplate,
       int positionProgram, AresWildcard wildcard, WildcardInstance instance, int offset,
-      ArrayList<AbstractBastNode> programStream, ArrayList<AbstractBastNode> templateStream) {
+      ArrayList<AbstractBastNode> programStream, ArrayList<AbstractBastNode> templateStream,
+      LinkedList<AbstractBastNode> requiredNodes,
+      Map<AbstractBastNode, NodeParentInformationHierarchy> programParents) {
     CompareNodesResult reset;
     ArrayList<AbstractBastNode> childlist;
     childlist = templateChildrenMap.get(wildcard);
@@ -825,6 +853,50 @@ public class RecommendationCreator {
             }
           }
         }
+      }
+      if (requiredNodes != null && requiredNodes.size() > 0) {
+        if (instance.headNodes.size() > 0) {
+          AbstractBastNode matchedProgramNode =
+              instance.headNodes.get(instance.headNodes.size() - 1);
+          if (matchedProgramNode != null) {
+            NodeParentInformationHierarchy npi = programParents.get(matchedProgramNode);
+            if (npi != null && npi.list != null && npi.list.size() > 0) {
+              NodeParentInformation np = npi.list.get(0);
+              if (np.parent.getField(np.fieldConstant).isList()) {
+                @SuppressWarnings("unchecked")
+                LinkedList<AbstractBastNode> nodes = (LinkedList<AbstractBastNode>) np.parent
+                    .getField(np.fieldConstant).getListField();
+                int remainingSize = nodes.size() - np.listId;
+                if (remainingSize < requiredNodes.size()) {
+                  return childlist;
+                }
+                boolean possibleLocationFound = false;
+                int locationPosition = np.listId + 1;
+                for (int i = 0; i < requiredNodes.size(); i++) {
+                  AbstractBastNode nextNodeToFind = requiredNodes.get(i);
+                  boolean foundRequiredNode = false;
+                  for (int j = locationPosition; j < nodes.size(); j++) {
+                    if (nextNodeToFind.getTag() == nodes.get(j).getTag()) {
+                      locationPosition = j + 1;
+                      foundRequiredNode = true;
+                      break;
+                    }
+                  }
+                  if (!foundRequiredNode) {
+                    return childlist;
+                  }
+                  if (i == requiredNodes.size() - 1) {
+                    possibleLocationFound = true;
+                  }
+                }
+                if (!possibleLocationFound) {
+                  return childlist;
+                }
+              }
+            }
+          }
+        }
+
       }
       wildcardResets.add(reset);
       resetTowildcardMap.put(reset, instance);
@@ -872,8 +944,7 @@ public class RecommendationCreator {
             }
             break;
           case DELETE:
-            BastFieldConstants childrenListNumber = ep
-                .getOldOrChangedIndex().childrenListNumber;
+            BastFieldConstants childrenListNumber = ep.getOldOrChangedIndex().childrenListNumber;
             if (childrenListNumber == BastFieldConstants.ARES_BLOCK_IDENTIFIERS) {
               continue;
             }

@@ -39,6 +39,7 @@ import de.fau.cs.inf2.cas.ares.recommendation.ExtendedAresPattern;
 import de.fau.cs.inf2.cas.ares.recommendation.Recommendation;
 import de.fau.cs.inf2.cas.ares.recommendation.RecommendationCreator;
 import de.fau.cs.inf2.cas.ares.recommendation.extension.ExtendedTemplateExtractor;
+import de.fau.cs.inf2.cas.ares.recommendation.visitors.FindInitialPatternStartsVisitor;
 import de.fau.cs.inf2.cas.ares.recommendation.visitors.FindSpecialPatternStartsVisitor;
 
 import de.fau.cs.inf2.cas.common.bast.nodes.AbstractBastNode;
@@ -110,8 +111,8 @@ public class CthreeProcessing {
    * @param start number of the group to start the computation
    * @param end number of the last group to compute
    */
-  public static void handleGroupPart(File cthreeFile, File tmpDir, 
-      int numThreads, int start, int end) {
+  public static void handleGroupPart(File cthreeFile, File tmpDir, int numThreads,
+      int start, int end) {
     HashMap<String, CommitPairIdentifier> cpis = new HashMap<>();
     HashMap<CommitPairIdentifier, String> cpisIds = new HashMap<>();
     ArrayList<ChangeGroup> groups = new ArrayList<>();
@@ -453,6 +454,7 @@ public class CthreeProcessing {
       HashMap<String, VcsRepository> repositories, File repoDir, int numThreads, long createTime) {
     final File outputFile = new File(workDir, "/recall_result.json");
     File outputSearch = new File(workDir, "/time_search.json");
+    File tmpDir = null;
     if (outputFile.exists() && outputSearch.exists()) {
       return;
     }
@@ -484,10 +486,8 @@ public class CthreeProcessing {
 
         GitRepository repository = (GitRepository) repositories.get(repositoryName);
         GitRevision revisionBefore = (GitRevision) repository.searchCommit(oldestId);
-        File tmpDir = Files.createTempDirectory(null).toFile();
+        tmpDir = Files.createTempDirectory(null).toFile();
         final File revDir = createRevisionFiles(tmpDir, repository, revisionBefore);
-
-        final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
         final AresMeasurement measurement = new AresMeasurement();
         ArrayList<ReadableEncodedScript> inputs = new ArrayList<>(2);
@@ -513,7 +513,7 @@ public class CthreeProcessing {
 
 
         SearchForCodeLocationsParameter parameterObject = new SearchForCodeLocationsParameter(
-            oldestId, repositoryName, revDir, executor, measurement, inputs, inputs,
+            oldestId, repositoryName, revDir, executioner, measurement, inputs, inputs,
             methodSignatureMap, methodBlockMap, filesArray, createTime, group, workDir);
         searchForCodeLocations(parameterObject);
         if (parameterObject.searchTime != null) {
@@ -530,10 +530,13 @@ public class CthreeProcessing {
         parameterObject.searchTime = null;
         parameterObject.searchTime = aresMapper.readValue(outputSearch, AresSearchTime.class);
         assert (parameterObject.searchTime != null);
-        executor.shutdown();
       }
     } catch (Throwable e) {
       return;
+    } finally {
+      if (tmpDir != null && tmpDir.exists()) {
+        FileUtils.deleteTmpDirectory(tmpDir.getAbsolutePath());
+      }
     }
     return;
   }
@@ -599,8 +602,8 @@ public class CthreeProcessing {
             new de.fau.cs.inf2.cas.ares.recommendation.visitors.CountNodesVisitor();
         testProgTmp.accept(countVisitor);
 
-        FindSpecialPatternStartsVisitor starts = new FindSpecialPatternStartsVisitor(
-            outerTemplate.originalAst.block.statements.getFirst(), outerTemplate);
+        FindInitialPatternStartsVisitor starts = new FindInitialPatternStartsVisitor(
+            outerTemplate.originalAst.block.statements, outerTemplate);
         testProgTmp.accept(starts);
         if (starts.starts.size() == 0) {
           continue;

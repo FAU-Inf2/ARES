@@ -94,6 +94,7 @@ public class ExtendedAresPattern implements Cloneable {
   public AresBlock originalAst = null;
   public AbstractBastNode patternStart = null;
   public int patternStartListIdOld = -1;
+  public BastFieldConstants patternStartFieldId = null;
   private ExtendedDiffResult diffResult = null;
   public HashMap<AbstractBastNode, LinkedList<BastEditOperation>> parentMap = null;
   public AresBlock modifiedAst = null;

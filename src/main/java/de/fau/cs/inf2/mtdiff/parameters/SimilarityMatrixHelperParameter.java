@@ -35,9 +35,12 @@ import de.fau.cs.inf2.mtdiff.intern.MatchingCandidate;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLong;
@@ -77,6 +80,8 @@ public class SimilarityMatrixHelperParameter {
   public boolean verbose;
   public int numThreads;
   public TreeMatcherConfiguration configuration;
+  public ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache;
+  public IdentityHashMap<INode, Integer> quickFindHashMap;
 
   /**
    * Instantiates a new similarity matrix helper parameter.
@@ -132,7 +137,10 @@ public class SimilarityMatrixHelperParameter {
       Map<INode, ArrayList<INode>> directChildrenMap1,
       Map<INode, ArrayList<INode>> directChildrenMap2, INode root1, INode root2,
       double weightSimilarity, double weightPosition, IdentityHashMap<INode, String> stringMap,
-      boolean verbose, int numThreads, TreeMatcherConfiguration configuration) {
+      boolean verbose, int numThreads, 
+      ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache,
+      IdentityHashMap<INode, Integer> quickFindHashMap,
+      TreeMatcherConfiguration configuration) {
     this.aggregationFinisheds = aggregationFinisheds;
     this.firstAggregations = firstAggregations;
     this.secondAggregations = secondAggregations;
@@ -165,6 +173,8 @@ public class SimilarityMatrixHelperParameter {
     this.stringMap = stringMap;
     this.verbose = verbose;
     this.numThreads = numThreads;
+    this.hashbasedCache = hashbasedCache;
+    this.quickFindHashMap = quickFindHashMap;
     this.configuration = configuration;
   }
 }

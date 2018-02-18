@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fau.cs.inf2.cas.ares.io.AresMapper;
 import de.fau.cs.inf2.cas.ares.io.RecommendationFile;
 import de.fau.cs.inf2.cas.ares.io.RecommendationResult;
+import de.fau.cs.inf2.cas.ares.pipeline.CthreeForkedProcessing;
 import de.fau.cs.inf2.cas.ares.pipeline.CthreeProcessing;
 
 import java.io.File;
@@ -69,11 +70,17 @@ public class ExecuteAresOnCthreeOutput {
     }
     int start = -1;
     int end = -1;
-    if (args.length == 4) {
+    if (args.length > 3) {
       start = Integer.parseInt(args[2]);
       end = Integer.parseInt(args[3]);
     }
-    CthreeProcessing.handleGroupPart(cthreeFile, tmpDir, NUM_THREADS);
+    boolean skipErrors = false;
+    if (args.length == 5) {
+      if (args[4].equals("skipErrors")) {
+        skipErrors = true;
+      }
+    }
+    CthreeForkedProcessing.handleGroupPart(cthreeFile, tmpDir, NUM_THREADS, start, end, skipErrors);
     writeJson(tmpDir);
   }
 

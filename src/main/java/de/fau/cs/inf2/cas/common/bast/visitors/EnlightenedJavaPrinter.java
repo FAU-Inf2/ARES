@@ -682,6 +682,7 @@ public class EnlightenedJavaPrinter implements IPrettyPrinter, IBastVisitor {
         addTokenData(node, 1, count);
         count++;
         if (expr != null) {
+          assert (node != expr);
           expr.accept(this);
         } else {
           assert (false);

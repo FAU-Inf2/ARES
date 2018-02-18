@@ -222,9 +222,10 @@ public class EditScriptApplicator {
     }
     foundPatternList.removeAll(relevantNodes);
     foundPatternList.removeAll(wildcardNodes);
-
-    template.patternStart.replaceField(BastFieldConstants.BLOCK_STATEMENT,
-        new BastField(foundPatternList));
+    if (template.patternStartFieldId.isList) {
+      template.patternStart.replaceField(template.patternStartFieldId,
+          new BastField(foundPatternList));
+    }
     BastBlock block = null;
     if (template.patternStart.info != null && template.patternStart.info.tokens != null
         && template.patternStart.info.tokens.length > 0) {
@@ -260,8 +261,24 @@ public class EditScriptApplicator {
     } else {
       foundPatternList.addAll(template.patternStartListIdOld, block.statements);
     }
-    template.patternStart.replaceField(BastFieldConstants.BLOCK_STATEMENT,
-        new BastField(foundPatternList));
+    if (template.patternStartFieldId.isList) {
+      template.patternStart.replaceField(template.patternStartFieldId,
+          new BastField(foundPatternList));
+    } else {
+      if (foundPatternList.size() == 1) {
+        // template.patternStart.replaceField(template.patternStartFieldId,
+        // new BastField(foundPatternList.get(0)));
+      } else {
+        LinkedList<AbstractBastStatement> stmts = new LinkedList<>();
+        for (AbstractBastNode node : foundPatternList) {
+          stmts.add((AbstractBastStatement) node);
+        }
+        BastBlock replacementBlock =
+            CreateJavaNodeHelper.createBlock(template.patternStart.info.tokens[0], stmts);
+        template.patternStart.replaceField(template.patternStartFieldId,
+            new BastField(replacementBlock));
+      }
+    }
     IPrettyPrinter printer;
     printer = ParserFactory.getAresPrettyPrinter();
     program.accept(printer);
@@ -997,12 +1014,19 @@ public class EditScriptApplicator {
         case BastAsgnExpr.TAG:
           applyUpdateToAsgnExpr(uop, oldFoundNode);
           break;
+        case BastForStmt.TAG:
+          applyUpdateToFor(uop, oldFoundNode);
+          break;
         default:
           assert (false);
       }
     }
   }
 
+  private static void applyUpdateToFor(UpdateOperation uop, AbstractBastNode oldFoundNode) {
+    // TODO
+    assert (false);
+  }
 
   private static void applyUpdateToAsgnExpr(UpdateOperation uop, AbstractBastNode oldFoundNode) {
     BasicJavaToken javaToken;
@@ -1387,7 +1411,7 @@ public class EditScriptApplicator {
 
       String keyName = AresWrapper.staticGetValue(entry.getKey());
       String valueName = AresWrapper.staticGetValue(entry.getValue());
-      if ((keyName != null && !keyName.equals("")) 
+      if ((keyName != null && !keyName.equals(""))
           || (valueName != null && !valueName.equals(""))) {
         if (!keyName.equals(valueName)) {
           HashSet<String> toRemoveSet = toRemoveMap.get(entry.getKey().getTag());

@@ -1,23 +1,20 @@
 /*
  * Copyright (c) 2017 Programming Systems Group, CS Department, FAU
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 
@@ -83,6 +80,9 @@ class SimilarityMatrixHelper {
   private int numThreads;
   private TreeMatcherConfiguration configuration;
 
+  private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache;
+  private IdentityHashMap<INode, Integer> quickFindHashMap;
+
   /**
    * Instantiates a new restructured tree diff helper runnable.
    * 
@@ -120,6 +120,8 @@ class SimilarityMatrixHelper {
     this.stringMap = parameterObject.stringMap;
     this.numThreads = parameterObject.numThreads;
     this.configuration = parameterObject.configuration;
+    this.hashbasedCache = parameterObject.hashbasedCache;
+    this.quickFindHashMap = parameterObject.quickFindHashMap;
   }
 
   private ArrayList<INode> oldNodes;
@@ -369,13 +371,13 @@ class SimilarityMatrixHelper {
       updateSimilarityRow(new UpdateSimilarityRowParameter(aggregationFinished, similarityScores,
           firstAggregations, secondAggregations, currentResultMap, changed, 0, newNodes,
           onlyOneClassPair, resultMap, stringSim, stringSimCache, similarityCache,
-          similarityEntries, stringMap, verbose));
+          similarityEntries, stringMap, verbose, hashbasedCache, quickFindHashMap));
     }
     for (int i = 1; i < oldNodes.size(); i++) {
       updateSimilarityRow(new UpdateSimilarityRowParameter(aggregationFinished, similarityScores,
           firstAggregations, secondAggregations, currentResultMap, changed, i, newNodes,
           onlyOneClassPair, resultMap, stringSim, stringSimCache, similarityCache,
-          similarityEntries, stringMap, verbose));
+          similarityEntries, stringMap, verbose, hashbasedCache, quickFindHashMap));
     }
   }
 
@@ -504,7 +506,16 @@ class SimilarityMatrixHelper {
               similarity = 0.0f;
 
             } else {
-              if (leavesMap1.get(firstAggregation.getAssociatedTree()).size()
+              final Integer firstHash =
+                  parameterObject.quickFindHashMap.get(firstAggregation.getAssociatedTree());
+              ConcurrentHashMap<Integer, Float> singleMap = new ConcurrentHashMap<>();
+              hashbasedCache.putIfAbsent(firstHash, singleMap);
+              singleMap = hashbasedCache.get(firstHash);
+              final Integer secondHash =
+                  parameterObject.quickFindHashMap.get(secondAggregation.getAssociatedTree());
+              if (singleMap.containsKey(secondHash)) {
+                similarity = (float) (singleMap.get(secondHash));
+              } else if (leavesMap1.get(firstAggregation.getAssociatedTree()).size()
                   * leavesMap2.get(secondAggregation.getAssociatedTree()).size() > 10000) {
 
                 if (map != null) {
@@ -517,6 +528,8 @@ class SimilarityMatrixHelper {
                         parameterObject.onlyOneClassPair, parameterObject.resultMap,
                         parameterObject.stringSim, parameterObject.currentResultMap,
                         parameterObject.verbose);
+                    singleMap.put(secondHash, similarity);
+
                     if (parameterObject.similarityEntries
                         .get() < TreeMatcher.SIMILIARITY_CACHE_SIZE) {
                       map.put(secondAggregation.getAssociatedTree(), similarity);
@@ -530,6 +543,8 @@ class SimilarityMatrixHelper {
                       parameterObject.onlyOneClassPair, parameterObject.resultMap,
                       parameterObject.stringSim, parameterObject.currentResultMap,
                       parameterObject.verbose);
+                  singleMap.put(secondHash, similarity);
+
                   if (parameterObject.similarityEntries
                       .get() < TreeMatcher.SIMILIARITY_CACHE_SIZE) {
                     parameterObject.similarityCache.put(firstAggregation.getAssociatedTree(), tmp);
@@ -543,6 +558,8 @@ class SimilarityMatrixHelper {
                     parameterObject.onlyOneClassPair, parameterObject.resultMap,
                     parameterObject.stringSim, parameterObject.currentResultMap,
                     parameterObject.verbose);
+                // singleMap.put(secondHash, similarity);
+
               }
 
             }
@@ -815,7 +832,7 @@ class SimilarityMatrixHelper {
         updateSimilarityRow(new UpdateSimilarityRowParameter(aggregationFinished, similarityScores,
             firstAggregations, secondAggregations, currentResultMap, changed, i, newNodes,
             onlyOneClassPair, resultMap, stringSim, stringSimCache, similarityCache,
-            similarityEntries, stringMap, verbose));
+            similarityEntries, stringMap, verbose, hashbasedCache, quickFindHashMap));
       }
       workerCounter.decrementAndGet();
     }

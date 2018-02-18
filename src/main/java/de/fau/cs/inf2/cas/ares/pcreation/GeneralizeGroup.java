@@ -520,9 +520,12 @@ public class GeneralizeGroup {
   public void run() {
     ExecutorService executioner = Executors.newFixedThreadPool(NUM_THREADS);
     ExecutorService innerExecutioner = Executors.newFixedThreadPool(NUM_THREADS);
-
-    run(executioner, innerExecutioner, false);
-    executioner.shutdown();
+    try {
+      run(executioner, innerExecutioner, false);
+    } catch (Throwable t) {
+      executioner.shutdown();
+      throw t;
+    }
   }
 
   /**

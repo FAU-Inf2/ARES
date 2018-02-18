@@ -41,6 +41,7 @@ public class FindPatternStartsVisitor extends AresDefaultFieldVisitor {
   public boolean exactName = false;
   protected AbstractBastNode nodeToFind = null;
   protected AresWildcard wildcard = null;
+  private boolean visit = true;
 
   
   /**
@@ -125,9 +126,6 @@ public class FindPatternStartsVisitor extends AresDefaultFieldVisitor {
 
     }
   }
-
-  private boolean visit = true;
-
   
   /**
    * Begin visit.

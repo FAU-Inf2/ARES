@@ -67,6 +67,7 @@ public class ComputeTiedLeafSimilaritiesParameter {
   public ArrayList<HashSet<MatchingCandidate<INode>>> mcList;
   public AtomicInteger treeDiffCounter;
   public LinkedList<Future<Set<MatchingCandidate<INode>>>> diffResultList;
+  public IdentityHashMap<INode, Integer> quickFindHashMap;
 
   /**
    * Instantiates a new compute tied leaf similarities parameter.
@@ -110,7 +111,8 @@ public class ComputeTiedLeafSimilaritiesParameter {
       LinkedList<MatchingCandidate<INode>> candidateList, ArrayList<ArrayList<INode>> oldNodeArray,
       ArrayList<ArrayList<INode>> newNodeArray, ArrayList<HashSet<MatchingCandidate<INode>>> mcList,
       AtomicInteger treeDiffCounter,
-      LinkedList<Future<Set<MatchingCandidate<INode>>>> diffResultList) {
+      LinkedList<Future<Set<MatchingCandidate<INode>>>> diffResultList,
+      IdentityHashMap<INode, Integer> quickFindHashMap) {
     this.orderedList1 = orderedList1;
     this.orderedList2 = orderedList2;
     this.matchedLeaves = matchedLeaves;
@@ -135,5 +137,6 @@ public class ComputeTiedLeafSimilaritiesParameter {
     this.mcList = mcList;
     this.treeDiffCounter = treeDiffCounter;
     this.diffResultList = diffResultList;
+    this.quickFindHashMap = quickFindHashMap;
   }
 }

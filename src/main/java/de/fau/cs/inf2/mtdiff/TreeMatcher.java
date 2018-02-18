@@ -348,7 +348,7 @@ public class TreeMatcher implements ITreeMatcher {
     matchLeaves(new MatchLeavesParameter(orderedList1, orderedList2, matchedLeaves, resultMap,
         unmatchedNodes1, unmatchedNodes2, onlyOneClassPair, list, stringSimCache, leaves1tmp,
         leaves2tmp, skipList, leafMatcher, parents1, parents2, leavesMap1, leavesMap2,
-        directChildrenMap1, directChildrenMap2, null, stringMap, verbose));
+        directChildrenMap1, directChildrenMap2, null, stringMap, verbose, quickFind));
     HashSet<ComparePair<INode>> resultSet = new HashSet<>();
 
     resultSet.addAll(resultMap.values());
@@ -509,7 +509,7 @@ public class TreeMatcher implements ITreeMatcher {
         parameterObject.leavesMap1, parameterObject.leavesMap2, parameterObject.directChildrenMap1,
         parameterObject.directChildrenMap2, parameterObject.stringMap, parameterObject.verbose,
         similarityCache, candidateList, oldNodeArray, newNodeArray, mcList, treeDiffCounter,
-        diffResultList));
+        diffResultList, parameterObject.quickFindHashMap));
     waitForTiedResults(parameterObject.matchedLeaves, parameterObject.verbose, leafSimCounter,
         candidateList, nodeMCs, oldNodeArray, newNodeArray, mcList, diffResultList);
 
@@ -599,6 +599,8 @@ public class TreeMatcher implements ITreeMatcher {
 
   private void computeTiedLeafSimilarities(ComputeTiedLeafSimilaritiesParameter parameterObject)
       throws InterruptedException, ExecutionException {
+    ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Float>> hashbasedCache = 
+        new ConcurrentHashMap<>();
     for (int i = 0; i < parameterObject.oldNodeArray.size(); i++) {
       ArrayList<INode> newNodeList = parameterObject.newNodeArray.get(i);
       ArrayList<INode> oldNodeList = parameterObject.oldNodeArray.get(i);
@@ -613,7 +615,7 @@ public class TreeMatcher implements ITreeMatcher {
               labelConfiguration, parameterObject.leafMatcher, parameterObject.directChildrenMap1,
               parameterObject.directChildrenMap2, tree1, tree2, configuration.weightSimilarity,
               configuration.weightPosition, parameterObject.stringMap, parameterObject.verbose,
-              numThreads, configuration));
+              numThreads, hashbasedCache, parameterObject.quickFindHashMap, configuration));
       if (oldNodeList.size() * newNodeList.size() > 10000000) {
         handleLargeMemoryLeafSimilarity(parameterObject, i, newNodeList, oldNodeList, subList,
             treeDiffRunnable);
