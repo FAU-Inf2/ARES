@@ -244,7 +244,8 @@ public class CthreeForkedProcessing {
     final String className = entryClass.getName();
 
     final String[] args =
-        appendAdditionalArgs(additionalArgs, javaBinary, "-ea", "-cp", classPath, className);
+        appendAdditionalArgs(additionalArgs, javaBinary, 
+        "-Xss5m", "-ea", "-cp", classPath, className);
 
     final ProcessBuilder processBuilder = new ProcessBuilder(args);
     processBuilder.inheritIO();
@@ -263,7 +264,7 @@ public class CthreeForkedProcessing {
     final Process process = execute(CthreeForkedProcessing.class, args);
 
     try {
-      process.waitFor(20, TimeUnit.MINUTES);
+      process.waitFor(10, TimeUnit.MINUTES);
     } catch (final Throwable throwable) {
       System.err.println("Unable to wait for child process: " + throwable.getMessage());
       return;

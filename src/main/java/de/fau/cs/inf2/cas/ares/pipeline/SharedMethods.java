@@ -456,6 +456,7 @@ public class SharedMethods {
     System.out.format("Lower quartile: %f\n",
         ((double) Statistics.getLowerQuartile(valuesCreate)) / Statistics.NANO);
     System.out.format("min: %f\n", ((double) valuesCreate.get(0)) / Statistics.NANO);
+    System.out.format("mean: %f\n", ((double) Statistics.getMean(valuesCreate)) / Statistics.NANO);
   }
 
   /**

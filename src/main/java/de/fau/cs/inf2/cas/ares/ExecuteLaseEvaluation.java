@@ -203,8 +203,9 @@ public class ExecuteLaseEvaluation {
       System.out.println();
       System.out.println("Time ARES - Two Input Changes: ");
       SharedMethods.printTimeData(newResults.results);
+      System.out.println("Time ARES - All Input Changes: ");
+      SharedMethods.printTimeData(allData.results);
       System.out.println("\n############################################\n");
-
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(-1);
