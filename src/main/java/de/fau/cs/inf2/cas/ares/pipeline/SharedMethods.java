@@ -64,6 +64,7 @@ import de.fau.cs.inf2.cas.common.util.num.Statistics;
 import de.fau.cs.inf2.cas.common.util.string.LevenshteinDistance;
 
 import de.fau.cs.inf2.cas.common.vcs.ExtractUtilities.SignaturePrinter;
+import de.fau.cs.inf2.cthree.data.Cluster;
 import de.fau.cs.inf2.cthree.data.DataSet;
 import de.fau.cs.inf2.cthree.io.DataBind;
 
@@ -512,9 +513,12 @@ public class SharedMethods {
       HashMap<String, HashMap<String, LinkedList<Double>>> foundInputsMap, String laseResultPath) {
     List<RecommendationResult> laseResults =
         SharedMethods.readRecommendationResultsFromFile(laseResultPath);
+    int recommendations = 0;
+    int inputRecommendations = 0;
     for (RecommendationResult result : laseResults) {
       if (result.recommendationSets != null) {
         for (AresRecommendationSet set : result.recommendationSets) {
+          recommendations++;
           double accuracyChar = Double.MIN_VALUE;
           double accuracyToken = Double.MIN_VALUE;
           boolean found = false;
@@ -526,6 +530,7 @@ public class SharedMethods {
             }
           }
           if (found) {
+            inputRecommendations++;
             HashMap<String, LinkedList<Double>> inputsToGroup = foundInputsMap.get(result.name);
             if (inputsToGroup == null) {
               inputsToGroup = new HashMap<>();
@@ -544,15 +549,19 @@ public class SharedMethods {
         }
       }
     }
+    System.out.println("LASE Created Recommendations: " + recommendations);
+    System.out.println("LASE Created Input Recommendations: " + inputRecommendations);
   }
 
   private static void addAresAccuracyValues(
       HashMap<String, HashMap<String, LinkedList<Double>>> foundInputsMap, String aresResultPath) {
     List<RecommendationResult> aresResults =
         SharedMethods.readRecommendationResultsFromFile(aresResultPath);
-
+    int recommendations = 0;
+    int inputRecommendations = 0;
     for (RecommendationResult result : aresResults) {
       for (AresRecommendationSet set : result.recommendationSets) {
+        recommendations++;
         double accuracyCharMax = Double.MIN_VALUE;
         double accuracyTokenMax = Double.MIN_VALUE;
         double accuracyCharMin = Double.MAX_VALUE;
@@ -568,6 +577,7 @@ public class SharedMethods {
           }
         }
         if (found) {
+          inputRecommendations++;
           HashMap<String, LinkedList<Double>> inputsToGroup = foundInputsMap.get(result.name);
           if (inputsToGroup == null) {
             inputsToGroup = new HashMap<>();
@@ -587,6 +597,8 @@ public class SharedMethods {
         }
       }
     }
+    System.out.println("ARES Created Recommendations: " + recommendations);
+    System.out.println("ARES Created Input Recommendations: " + inputRecommendations);
   }
 
   private static void printJunitInputSize(String inputPath) {
@@ -594,6 +606,11 @@ public class SharedMethods {
     try {
       DataSet groupFileObject = dataMapper.readValue(new File(inputPath), DataSet.class);
       System.out.println("Groups of Code Changes: " + groupFileObject.clusters.size());
+      int members = 0;
+      for (Cluster cluster : groupFileObject.clusters) {
+        members += cluster.members.length;
+      }
+      System.out.println("Code Changes in these Groups: " + members);
     } catch (IOException e) {
       e.printStackTrace();
     }
