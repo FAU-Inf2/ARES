@@ -62,7 +62,7 @@ Read evaluation results in  [data/junit_evaluation](data/junit_evaluation) and  
 ```
 Read evaluation results in  [data/cthree_evaluation_phdthesis](data/cthree_evaluation_phdthesis):
 ```
-./gradlew readEvaluationResults,
+./gradlew readEvaluationResults
 ```
 
 Execute the evaluation of the LASE dataset:
