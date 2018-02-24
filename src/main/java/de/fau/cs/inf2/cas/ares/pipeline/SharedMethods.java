@@ -459,6 +459,24 @@ public class SharedMethods {
     System.out.format("min: %f\n", ((double) valuesCreate.get(0)) / Statistics.NANO);
     System.out.format("mean: %f\n", ((double) Statistics.getMean(valuesCreate)) / Statistics.NANO);
   }
+  
+  /**
+   * Print box plot values for a double array.
+   */
+  public static void printBoxPlotValuesDouble(ArrayList<Double> valuesCreate) {
+    Collections.sort(valuesCreate);
+    System.out.format("Max: %f\n",
+        ((double) valuesCreate.get(valuesCreate.size() - 1)));
+    System.out.format("Upper quartile: %f\n",
+        ((double) Statistics.getUpperQuartileDouble(valuesCreate)));
+    System.out.format("Median: %f\n",
+        ((double) Statistics.getMedianDouble(valuesCreate)));
+    System.out.format("Lower quartile: %f\n",
+        ((double) Statistics.getLowerQuartileDouble(valuesCreate)));
+    System.out.format("min: %f\n", ((double) valuesCreate.get(0)));
+    System.out.format("mean: %f\n", ((double) 
+        Statistics.getMeanDouble(valuesCreate)));
+  }
 
   /**
    * Prints the junit results.

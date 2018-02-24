@@ -29,7 +29,6 @@ import de.fau.cs.inf2.cas.ares.io.AresMapper;
 import de.fau.cs.inf2.cas.ares.io.RecommendationFile;
 import de.fau.cs.inf2.cas.ares.io.RecommendationResult;
 import de.fau.cs.inf2.cas.ares.pipeline.CthreeForkedProcessing;
-import de.fau.cs.inf2.cas.ares.pipeline.CthreeProcessing;
 
 import java.io.File;
 import java.io.IOException;

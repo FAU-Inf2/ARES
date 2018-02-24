@@ -98,10 +98,16 @@ task (executeLaseEvaluation, dependsOn: 'classes', type:JavaExec) {
 task (executeAresOnCthreeOutput, dependsOn: 'classes', type:JavaExec) {
   main = 'de.fau.cs.inf2.cas.ares.ExecuteAresOnCthreeOutput'
   classpath = sourceSets.main.runtimeClasspath
-  maxHeapSize = '60g'
+  maxHeapSize = '16g'
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
   }
+}
+
+task (readPhdThesisResults, dependsOn: 'classes', type:JavaExec) {
+  main = 'de.fau.cs.inf2.cas.ares.ReadPhdThesisResults'
+  classpath = sourceSets.main.runtimeClasspath
+  maxHeapSize = '25g'
 }
 
 sourceSets {

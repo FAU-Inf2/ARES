@@ -3,8 +3,9 @@
 This repository contains the ARES source code, a description of the ARES rule system and the evaluation results of the research paper 
 "G.  Dotzler, M. Kamp, P. Kreutzer, M. Philippsen: More Accurate Recommendations for Method-Level Changes".
 
+It also contains the ARES/C3 evaluation of the PhD thesis "G. Dotzler: Learning Code Transformations from Repositories, Friedrich-Alexander University Erlangen-Nürnberg, 2018".
 
-Archived Copy: 
+Archived copy of the research paper: 
 
 [![DOI](https://zenodo.org/badge/90181502.svg)](https://zenodo.org/badge/latestdoi/90181502)
 
@@ -22,6 +23,22 @@ This repository is structured as follows:
   - The dataset contains code snippets from ECLIPSE JDT Core and ECLIPSE SWT.
   - Eclipse JDT Core is licensed under the Eclipse Public License v1.0, see [LICENSE.epl](LICENSE.epl).
   - Eclipse SWT is licensed under the Eclipse Public License v1.0, see [LICENSE.epl](LICENSE.epl).
+- [data/cthree_evaluation_phdthesis](data/cthree_evaluation_phdthesis):
+  - The dataset contains code snippets from Ant, Checkstyle, Cobertura, DrJava, ECLIPSE JDT Core, ECLIPSE SWT, Fitlibrary,
+JGraphT and JUnit.
+  - Ant is licensed under the Apache License v2, see [LICENSE.apache](LICENSE.apache);
+  - Checkstyle is licensed under the GNU LGPL v2.1, see [LICENSE.lgpl](LICENSE.lgpl);
+  - Cobertura is licensed under the GNU GPL v2, see [LICENSE.gpl](LICENSE.gpl);
+  - DrJava is licensed under the BSD license, see [LICENSE.drjava.bsd](LICENSE.drjava.bsd);
+  - Eclipse JDT Core is licensed under the Eclipse Public License v1.0, see [LICENSE.epl](LICENSE.epl).
+  - Eclipse SWT is licensed under the Eclipse Public License v1.0, see [LICENSE.epl](LICENSE.epl).
+  - Fitlibrary is licensed under the GNU GPL v2, see [LICENSE.gpl](LICENSE.gpl);
+  - JGraphT is licensed under the GNU LGPL v2.1, see [LICENSE.lgpl](LICENSE.lgpl);
+  - JUnit is licensed under the Eclipse Public License v1.0, see [LICENSE.epl](LICENSE.epl).
+
+
+
+
 - [src](src): Contains the complete source code of ARES.
 
 ## Building and Running ARES
@@ -40,6 +57,10 @@ Run the examples in  [data/examples](data/examples):
 ```
 
 Read evaluation results in  [data/junit_evaluation](data/junit_evaluation) and  [data/lase_evaluation](data/lase_evaluation):
+```
+./gradlew readPhdThesisResults
+```
+Read evaluation results in  [data/cthree_evaluation_phdthesis](data/cthree_evaluation_phdthesis):
 ```
 ./gradlew readEvaluationResults,
 ```

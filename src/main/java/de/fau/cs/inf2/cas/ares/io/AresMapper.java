@@ -1,23 +1,20 @@
 /*
  * Copyright (c) 2017 Programming Systems Group, CS Department, FAU
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 
@@ -36,6 +33,10 @@ import de.fau.cs.inf2.cas.common.io.EncodedScript;
 import de.fau.cs.inf2.cas.common.io.ReadableEncodedGroup;
 import de.fau.cs.inf2.cas.common.io.ReadableEncodedGroupFile;
 import de.fau.cs.inf2.cas.common.io.ReadableEncodedScript;
+import de.fau.cs.inf2.cthree.data.Algorithm;
+import de.fau.cs.inf2.cthree.data.Cluster;
+import de.fau.cs.inf2.cthree.data.CodeChange;
+import de.fau.cs.inf2.cthree.data.DataSet;
 
 import java.util.List;
 
@@ -73,10 +74,16 @@ public class AresMapper {
       addMixIns(mapper, AresCreatePatternTime.class, MixInAresCreatePatternTime.class);
       addMixIns(mapper, AresSearchTime.class, MixInAresSearchTime.class);
       addMixIns(mapper, AresTimeMeasurementFile.class, MixInAresTimeMeasurementFile.class);
+      addMixIns(mapper, AresOnCthreeResultFile.class, MixInAresOnCthreeResultFile.class);
+      addMixIns(mapper, AresOnCthreeResult.class, MixInAresOnCthreeResult.class);
+      addMixIns(mapper, DataSet.class, MixInDataSet.class);
+      addMixIns(mapper, Cluster.class, MixInCluster.class);
+      addMixIns(mapper, CodeChange.class, MixInCodeChange.class);
     }
 
     return mapper;
   }
+
 
 
   @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
@@ -349,14 +356,14 @@ public class AresMapper {
     MixInReadableEncodedGroup(@JsonProperty("name") String name,
         @JsonProperty("scripts") List<ReadableEncodedScript> scripts) {}
   }
-  
+
   @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
       property = "@class")
   private abstract static class MixInAresTimeMeasurementFile {
 
     @JsonProperty("searchTwoFilesForLaseTime")
     List<AresSearchTime> searchTwoFilesForLaseTime;
-    
+
     @JsonProperty("searchTwoFilesTime")
     List<AresSearchTime> searchTwoFilesTime;
 
@@ -377,7 +384,7 @@ public class AresMapper {
         @JsonProperty("createTwoFilesTime") List<AresCreatePatternTime> createTwoFilesTime,
         @JsonProperty("createAllTime") List<AresCreatePatternTime> createAllTime) {}
   }
-  
+
   @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
       property = "@class")
   private abstract static class MixInAresCreatePatternTime {
@@ -444,6 +451,118 @@ public class AresMapper {
         @JsonProperty("parsing") long parsing,
         @JsonProperty("treeDifferencing") long treeDifferencing,
         @JsonProperty("numberOfJavaFiles") long numberOfJavaFiles) {}
+  }
+
+  @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
+      property = "@class")
+  private abstract static class MixInDataSet {
+    @JsonProperty("clusters")
+    private List<Cluster> clusters;
+
+    @SuppressWarnings("unused")
+    public MixInDataSet(@JsonProperty("clusters") final List<Cluster> clusters) {}
+  }
+
+  @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
+      property = "@class")
+  private abstract static class MixInCluster {
+    @JsonProperty("id")
+    private String id;
+
+    @JsonProperty("detectedBy")
+    private List<Algorithm> detectedBy;
+
+    @JsonProperty("members")
+    private CodeChange[] members;
+
+    @SuppressWarnings("unused")
+    public MixInCluster(@JsonProperty("id") final String id,
+        @JsonProperty("detectedBy") final List<Algorithm> detectedBy,
+        @JsonProperty("members") final CodeChange[] members) {}
+  }
+
+  @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
+      property = "@class")
+  private abstract static class MixInCodeChange {
+    @JsonProperty("id")
+    private String id;
+
+    @JsonProperty("repository")
+    private String repository;
+    @JsonProperty("fileName")
+    private String fileName;
+
+    @JsonProperty("commitBeforeChange")
+    private String commitBeforeChange;
+    @JsonProperty("commitAfterChange")
+    private String commitAfterChange;
+
+    @JsonProperty("methodNumberBeforeChange")
+    private int methodNumberBeforeChange;
+    @JsonProperty("methodNumberAfterChange")
+    private int methodNumberAfterChange;
+
+    @JsonProperty("signatureBeforeChange")
+    private String signatureBeforeChange;
+    @JsonProperty("signatureAfterChange")
+    private String signatureAfterChange;
+
+    @JsonProperty("diff")
+    private String[] diff;
+
+    @SuppressWarnings("unused")
+    public MixInCodeChange(@JsonProperty("id") final String id,
+        @JsonProperty("repository") final String repository,
+        @JsonProperty("fileName") final String fileName,
+        @JsonProperty("commitBeforeChange") final String commitBeforeChange,
+        @JsonProperty("commitAfterChange") final String commitAfterChange,
+        @JsonProperty("methodNumberBeforeChange") final int methodNumberBeforeChange,
+        @JsonProperty("methodNumberAfterChange") final int methodNumberAfterChange,
+        @JsonProperty("signatureBeforeChange") final String signatureBeforeChange,
+        @JsonProperty("signatureAfterChange") final String signatureAfterChange,
+        @JsonProperty("diff") final String[] diff) {}
+  }
+
+  @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
+      property = "@class")
+  private abstract static class MixInAresOnCthreeResultFile {
+
+    @JsonProperty("results")
+    List<AresOnCthreeResult> results;
+
+    MixInAresOnCthreeResultFile(@JsonProperty("results") List<AresOnCthreeResult> results) {}
+  }
+
+  @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
+      property = "@class")
+  private abstract static class MixInAresOnCthreeResult {
+
+    @JsonProperty("cluster")
+    public Cluster cluster;
+
+    @JsonProperty("recommendationResult")
+    public RecommendationResult recommendationResult;
+
+    @JsonProperty("cloneType")
+    public ClusterCloneType cloneType;
+
+    @JsonProperty("unchangedAccuracyTokens")
+    public List<Double> unchangedAccuracyTokens;
+
+    @JsonProperty("unchangedAccuracyCharacters")
+    public List<Double> unchangedAccuracyCharacters;
+
+
+    @SuppressWarnings("unused")
+    MixInAresOnCthreeResult(@JsonProperty("cluster") Cluster cluster,
+
+        @JsonProperty("recommendationResult") RecommendationResult recommendationResult,
+
+        @JsonProperty("cloneType") ClusterCloneType cloneType,
+
+        @JsonProperty("unchangedAccuracyTokens") List<Double> unchangedAccuracyTokens,
+
+        @JsonProperty("unchangedAccuracyCharacters") List<Double> unchangedAccuracyCharacters) {}
   }
 
 }
