@@ -4636,7 +4636,6 @@ public class JavaParser implements IParser {
     switch (((JavaToken) nextToken.token).type) {
       case AND:
       case OR:
-      case PLUS:
       case RPAREN:
       case COLON:
       case DIV:
@@ -4669,8 +4668,9 @@ public class JavaParser implements IParser {
         return parsePointInOperand(lexer, data, inputTokenAndHistory, currentTokenAndHistory, expr,
             nextToken, typeRes);
 
+      case PLUS:
       case MINUS:
-        if (typeRes.value == null) {
+        if (typeRes.value == null || typeRes.value.getTag() == BastClassType.TAG) {
           if (expr.value != null) {
             return new ParseResult<AbstractBastExpr>(expr.value, currentTokenAndHistory);
           }
