@@ -3,7 +3,7 @@
 This repository contains the ARES source code, a description of the ARES rule system and the evaluation results of the research paper 
 "G.  Dotzler, M. Kamp, P. Kreutzer, M. Philippsen: More Accurate Recommendations for Method-Level Changes".
 
-It also contains the ARES/C3 evaluation of the PhD thesis "G. Dotzler: Learning Code Transformations from Repositories, Friedrich-Alexander University Erlangen-Nürnberg, 2018".
+It also contains the ARES/C3 evaluation of the PhD thesis "G. Dotzler: Learning Code Transformations from Repositories, Friedrich-Alexander University Erlangen-Nürnberg, 2018". https://doi.org/10.25593/978-3-96147-142-3
 
 Archived copy of the research paper: 
 
