@@ -83,4 +83,26 @@ public class BastXor extends AbstractBaseBinaryExpr {
     return TAG;
   }
 
+  
+  /**
+   * Replace field.
+   *
+   * @param field the field
+   * @param fieldValue the field value
+   */
+  public void replaceField(BastFieldConstants field, BastField fieldValue) {
+    fieldMap.put(field, fieldValue);
+    switch (field) {
+      case XOR_LEFT:
+        this.left = (AbstractBastExpr) fieldValue.getField();
+        break;
+      case XOR_RIGHT:
+        this.right = (AbstractBastExpr) fieldValue.getField();
+        break;
+      default:
+        assert (false);
+
+    }
+  }
+
 }
