@@ -120,6 +120,7 @@ public final class TagConstants {
   public static final int BAST_INCLUDE = BAST_START + 113;
   public static final int BAST_BASIC_TYPE = BAST_START + 114;
   public static final int BAST_ARRAY_TYPE = BAST_START + 115;
+  public static final int BAST_ANNOTATED_TYPE = BAST_START + 116;
   public static final int BAST_ENUM_SPEC = BAST_START + 117;
   public static final int BAST_UNARY_EXPR = BAST_START + 118;
   public static final int BAST_BOOL_CONST = BAST_START + 119;
@@ -149,6 +150,8 @@ public final class TagConstants {
   public static final int BAST_EMPTY_DECLARATION = BAST_START + 143;
   public static final int BAST_CLASS_CONST = BAST_START + 144;
   public static final int BAST_TYPE_ARGUMENT = BAST_START + 145;
+  public static final int BAST_METHOD_REFERENCE = BAST_START + 146;
+  public static final int BAST_LAMBDA_EXPR = BAST_START + 147;
   static final int BAST_NETWORK = BAST_START + 148;
   public static final int BAST_NAMESPACE_IDENT = BAST_START + 150;
 
@@ -182,6 +185,7 @@ public final class TagConstants {
   public static final int TYPE_FLOAT = TagConstants.TYPE_START + 11;
   public static final int TYPE_STRING = TagConstants.TYPE_START + 12;
   public static final int TYPE_ARRAY = TagConstants.TYPE_START + 13;
+  public static final int TYPE_ANNOTATED = TagConstants.TYPE_START + 14;
   public static final int TYPE_POINTER = TagConstants.TYPE_START + 15;
   @SuppressWarnings("ucd")
   public static final int TYPE_GENERAL_INT = TagConstants.TYPE_START + 16;

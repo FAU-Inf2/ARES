@@ -348,10 +348,18 @@ public class JavaLexer {
         tmpToken.data.append(',');
         return addStructureTokenToHistory(previousToken, tmpTokenAndHistory);
       case ':':
-        tmpToken.endPos = character.endPos;
-        tmpToken.type = BasicJavaToken.COLON;
-        tmpToken.data.append(':');
-        return addStructureTokenToHistory(previousToken, tmpTokenAndHistory);
+        tmpCharacter = getNextChar(fileData.data, character.endPos + 1, false);
+        if (tmpCharacter.character == ':') {
+          tmpToken.endPos = tmpCharacter.endPos;
+          tmpToken.type = BasicJavaToken.REFERENCE;
+          tmpToken.data.append(':').append(':');
+          return addStructureTokenToHistory(previousToken, tmpTokenAndHistory);
+        } else {
+          tmpToken.endPos = character.endPos;
+          tmpToken.type = BasicJavaToken.COLON;
+          tmpToken.data.append(':');
+          return addStructureTokenToHistory(previousToken, tmpTokenAndHistory);
+        }
       case '<':
         tmpCharacter = getNextChar(fileData.data, character.endPos + 1, false);
         switch (tmpCharacter.character) {
@@ -553,6 +561,11 @@ public class JavaLexer {
           case '=':
             tmpToken.type = BasicJavaToken.MINUS_EQUAL;
             tmpToken.data.append("-=");
+            tmpToken.endPos = tmpCharacter.endPos;
+            return addStructureTokenToHistory(previousToken, tmpTokenAndHistory);
+          case '>':
+            tmpToken.type = BasicJavaToken.LAMBDA;
+            tmpToken.data.append("->");
             tmpToken.endPos = tmpCharacter.endPos;
             return addStructureTokenToHistory(previousToken, tmpTokenAndHistory);
           default:

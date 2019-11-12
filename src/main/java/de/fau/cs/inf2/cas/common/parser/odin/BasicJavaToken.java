@@ -137,6 +137,8 @@ public enum BasicJavaToken implements ITokenType {
   CONTINUE("continue", 154),
   THROW("throw", 155),
   DO("do", 156),
+  REFERENCE("::", 157),
+  LAMBDA("->", 158),
   MATCH("match", 441),
   WILDCARD("wildcard", 442),
   PATTERN("pattern", 443),

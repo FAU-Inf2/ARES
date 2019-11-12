@@ -78,8 +78,10 @@ import de.fau.cs.inf2.cas.common.bast.nodes.BastInstanceOf;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastIntConst;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastInterfaceDecl;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastLabelStmt;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastLambdaExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastLineComment;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastListInitializer;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastMethodReference;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastMultiExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastNameIdent;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastNew;
@@ -114,6 +116,7 @@ import de.fau.cs.inf2.cas.common.bast.nodes.BastTypeSpecifier;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastUnaryExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastWhileStatement;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastXor;
+import de.fau.cs.inf2.cas.common.bast.type.BastAnnotatedType;
 import de.fau.cs.inf2.cas.common.bast.type.BastArrayType;
 import de.fau.cs.inf2.cas.common.bast.type.BastBasicType;
 import de.fau.cs.inf2.cas.common.bast.type.BastClassType;
@@ -179,6 +182,13 @@ public interface IBastVisitor extends IAstVisitor {
    * @param node the node
    */
   public void visit(BastAnnotationMethod node);
+
+  /**
+   * Visit.
+   *
+   * @param node the node
+   */
+  public void visit(BastAnnotatedType node);
 
   /**
    * Visit.
@@ -528,6 +538,13 @@ public interface IBastVisitor extends IAstVisitor {
    *
    * @param node the node
    */
+  public void visit(BastLambdaExpr node);
+
+  /**
+   * Visit.
+   *
+   * @param node the node
+   */
   public void visit(BastLabelStmt node);
 
   /**
@@ -543,6 +560,13 @@ public interface IBastVisitor extends IAstVisitor {
    * @param node the node
    */
   public void visit(BastListInitializer node);
+
+  /**
+   * Visit.
+   *
+   * @param node the node
+   */
+  public void visit(BastMethodReference node);
 
   /**
    * Visit.

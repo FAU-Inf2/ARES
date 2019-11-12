@@ -273,6 +273,12 @@ public class TokenChecker {
     }
   }
 
+  static void expectLambda(TokenAndHistory nextToken) {
+    if (((JavaToken) nextToken.token).type != BasicJavaToken.LAMBDA) {
+      throw new SyntaxError("-> expected.", ((JavaToken) nextToken.token));
+    }
+  }
+
   static boolean isAnd(TokenAndHistory nextToken) {
     return ((JavaToken) nextToken.token).type == BasicJavaToken.AND;
   }
@@ -581,6 +587,18 @@ public class TokenChecker {
 
   static boolean isThrows(TokenAndHistory nextToken) {
     return ((JavaToken) nextToken.token).type == BasicJavaToken.THROWS;
+  }
+
+  static boolean isReference(TokenAndHistory nextToken) {
+    return ((JavaToken) nextToken.token).type == BasicJavaToken.REFERENCE;
+  }
+
+  static boolean isNew(TokenAndHistory nextToken) {
+    return ((JavaToken) nextToken.token).type == BasicJavaToken.NEW;
+  }
+
+  static boolean isLambda(TokenAndHistory nextToken) {
+    return ((JavaToken) nextToken.token).type == BasicJavaToken.LAMBDA;
   }
 
   static void lessNotExpected(TokenAndHistory nextToken) {

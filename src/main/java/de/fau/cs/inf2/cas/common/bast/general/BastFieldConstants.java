@@ -42,6 +42,15 @@ public enum BastFieldConstants {
       10 * TagConstants.BAST_ADDITIVE_EXPR + 1),
   AND_LEFT("AND_LEFT", TagConstants.BAST_AND, 10 * TagConstants.BAST_AND + 0),
   AND_RIGHT("AND_RIGHT", TagConstants.BAST_AND, 10 * TagConstants.BAST_AND + 1),
+  ANNOTATED_TYPE_ANNOTATIONS(
+      "ANNOTATED_TYPE_ANNOTATIONS",
+      TagConstants.BAST_ANNOTATED_TYPE,
+      10 * TagConstants.BAST_ANNOTATED_TYPE + 0,
+      true),
+  ANNOTATED_TYPE_TYPE(
+      "ANNOTATED_TYPE_TYPE",
+      TagConstants.BAST_ANNOTATED_TYPE,
+      10 * TagConstants.BAST_ANNOTATED_TYPE + 1),
   ANNOTATION_DECL_NAME(
       "ANNOTATION_DECL_NAME",
       TagConstants.BAST_ANNOTATION_DECL,
@@ -546,10 +555,30 @@ public enum BastFieldConstants {
       10 * TagConstants.ARES_CASE + 0,
       true),
 
+  LAMBDA_PARAMETERS(
+      "LAMBDA_PARAMETERS",
+      TagConstants.BAST_LAMBDA_EXPR,
+      10 * TagConstants.BAST_LAMBDA_EXPR + 0, true),
+  LAMBDA_BODY(
+      "LAMBDA_BODY",
+      TagConstants.BAST_LAMBDA_EXPR,
+      10 * TagConstants.BAST_LAMBDA_EXPR + 1),
   LIST_INITIALIZER_INIT(
       "LIST_INITIALIZER_INIT",
       TagConstants.BAST_LIST_INITIALIZER,
       10 * TagConstants.BAST_LIST_INITIALIZER + 0, true),
+  METHOD_REFERENCE_TARGET(
+      "METHOD_REFERENCE_TARGET",
+      TagConstants.BAST_METHOD_REFERENCE,
+      10 * TagConstants.BAST_METHOD_REFERENCE + 0),
+  METHOD_REFERENCE_TYPEARGS(
+      "METHOD_REFERENCE_TYPEARGS",
+      TagConstants.BAST_METHOD_REFERENCE,
+      10 * TagConstants.BAST_METHOD_REFERENCE + 1, true),
+  METHOD_REFERENCE_NAME(
+      "METHOD_REFERENCE_NAME",
+      TagConstants.BAST_METHOD_REFERENCE,
+      10 * TagConstants.BAST_METHOD_REFERENCE + 2),
   MULTI_EXPR_LEFT(
       "MULTI_EXPR_LEFT",
       TagConstants.BAST_MULTI_EXPR,

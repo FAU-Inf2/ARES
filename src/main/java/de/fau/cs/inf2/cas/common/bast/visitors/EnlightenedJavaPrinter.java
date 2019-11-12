@@ -85,8 +85,10 @@ import de.fau.cs.inf2.cas.common.bast.nodes.BastInstanceOf;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastIntConst;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastInterfaceDecl;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastLabelStmt;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastLambdaExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastLineComment;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastListInitializer;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastMethodReference;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastMultiExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastNameIdent;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastNew;
@@ -121,6 +123,7 @@ import de.fau.cs.inf2.cas.common.bast.nodes.BastTypeSpecifier;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastUnaryExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastWhileStatement;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastXor;
+import de.fau.cs.inf2.cas.common.bast.type.BastAnnotatedType;
 import de.fau.cs.inf2.cas.common.bast.type.BastArrayType;
 import de.fau.cs.inf2.cas.common.bast.type.BastBasicType;
 import de.fau.cs.inf2.cas.common.bast.type.BastClassType;
@@ -473,6 +476,16 @@ public class EnlightenedJavaPrinter implements IPrettyPrinter, IBastVisitor {
       }
     }
     addAllTokens(node, false);
+  }
+
+
+  /**
+   * Visit.
+   *
+   * @param node the node
+   */
+  public void visit(BastAnnotatedType node) {
+    throw new UnsupportedOperationException();
   }
 
 
@@ -1480,6 +1493,17 @@ public class EnlightenedJavaPrinter implements IPrettyPrinter, IBastVisitor {
    * @param node the node
    */
   @Override
+  public void visit(BastLambdaExpr node) {
+    throw new UnsupportedOperationException();
+  }
+
+
+  /**
+   * Visit.
+   *
+   * @param node the node
+   */
+  @Override
   public void visit(BastLabelStmt node) {
     if (node.ident != null) {
       node.ident.accept(this);
@@ -1524,6 +1548,17 @@ public class EnlightenedJavaPrinter implements IPrettyPrinter, IBastVisitor {
     addTokenData(node, 3);
     addTokenData(node, 4);
 
+  }
+
+
+  /**
+   * Visit.
+   *
+   * @param node the node
+   */
+  @Override
+  public void visit(BastMethodReference node) {
+    throw new UnsupportedOperationException();
   }
 
 

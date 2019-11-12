@@ -79,7 +79,9 @@ import de.fau.cs.inf2.cas.common.bast.nodes.BastInstanceOf;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastIntConst;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastInterfaceDecl;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastLabelStmt;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastLambdaExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastListInitializer;
+import de.fau.cs.inf2.cas.common.bast.nodes.BastMethodReference;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastMultiExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastNameIdent;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastNew;
@@ -108,6 +110,7 @@ import de.fau.cs.inf2.cas.common.bast.nodes.BastTypeSpecifier;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastUnaryExpr;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastWhileStatement;
 import de.fau.cs.inf2.cas.common.bast.nodes.BastXor;
+import de.fau.cs.inf2.cas.common.bast.type.BastAnnotatedType;
 import de.fau.cs.inf2.cas.common.bast.type.BastArrayType;
 import de.fau.cs.inf2.cas.common.bast.type.BastBasicType;
 import de.fau.cs.inf2.cas.common.bast.type.BastClassType;
@@ -486,7 +489,7 @@ public class JavaParser implements IParser {
       return new ParseResult<LinkedList<AbstractBastExpr>>(list, currentTokenAndHistory);
     } else {
       ParseResult<AbstractBastExpr> exprRes =
-          expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+          expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
       currentTokenAndHistory = exprRes.currentTokenAndHistory;
       if (exprRes.value != null) {
         list = add(list, exprRes.value);
@@ -496,7 +499,7 @@ public class JavaParser implements IParser {
         currentTokenAndHistory = nextToken;
         additionalTokens.add(currentTokenAndHistory);
         currentTokenAndHistory = currentTokenAndHistory.setFlushed();
-        exprRes = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+        exprRes = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
         if (exprRes.value != null) {
           list = add(list, exprRes.value);
           currentTokenAndHistory = exprRes.currentTokenAndHistory;
@@ -591,14 +594,14 @@ public class JavaParser implements IParser {
     currentTokenAndHistory = nextToken;
     tokens[0] = currentTokenAndHistory;
     ParseResult<AbstractBastExpr> firstAssert =
-        expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+        expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
     ParseResult<AbstractBastExpr> secondAssert = new ParseResult<AbstractBastExpr>(null, null);
     currentTokenAndHistory = firstAssert.currentTokenAndHistory;
     nextToken = lexer.nextToken(data, currentTokenAndHistory);
     if (TokenChecker.isColon(nextToken)) {
       currentTokenAndHistory = nextToken;
       tokens[1] = currentTokenAndHistory;
-      secondAssert = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+      secondAssert = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
       currentTokenAndHistory = secondAssert.currentTokenAndHistory;
       nextToken = lexer.nextToken(data, currentTokenAndHistory);
     }
@@ -1895,7 +1898,7 @@ public class JavaParser implements IParser {
         currentTokenAndHistory = nextToken.setFlushed();
         nextToken = lexer.nextToken(data, currentTokenAndHistory);
         if (TokenChecker.isNotRightBracket(nextToken)) {
-          arrayExpr = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+          arrayExpr = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
           currentTokenAndHistory = arrayExpr.currentTokenAndHistory;
           arrayList = add(arrayList, arrayExpr.value);
           nextToken = lexer.nextToken(data, currentTokenAndHistory);
@@ -2358,20 +2361,191 @@ public class JavaParser implements IParser {
       currentTokenAndHistory = nextToken;
       tokens[0] = currentTokenAndHistory;
       ParseResult<AbstractBastExpr> truePart =
-          expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+          expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
       currentTokenAndHistory = truePart.currentTokenAndHistory;
       nextToken = lexer.nextToken(data, currentTokenAndHistory);
       TokenChecker.expectColon(nextToken);
       currentTokenAndHistory = nextToken;
       tokens[1] = currentTokenAndHistory;
       ParseResult<AbstractBastExpr> falsePart =
-          expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+          expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
       currentTokenAndHistory = falsePart.currentTokenAndHistory;
       return new ParseResult<AbstractBastExpr>(
           new BastCondExpr(tokens, left.value, truePart.value, falsePart.value),
           currentTokenAndHistory);
     } else {
       return left;
+    }
+  }
+
+
+  /**
+   * Parse assignment or lambda.
+   *
+   * @param lexer the lexer
+   * @param data the data
+   * @param inputTokenAndHistory the input token
+   * @return the result of the parser
+   */
+  public ParseResult<AbstractBastExpr> expressionAsgnOrLambda(final JavaLexer lexer,
+      final FileData data, final TokenAndHistory inputTokenAndHistory) {
+
+    TokenAndHistory lookahead = lexer.nextToken(data, inputTokenAndHistory);
+
+    // Tracks the current level of nested parentheses
+    int parensLevel = -1;
+    if (TokenChecker.isIdentifier(lookahead)) {
+      parensLevel = 0;
+    } else if (TokenChecker.isLeftParenthesis(lookahead)) {
+      parensLevel = 1;
+    }
+
+    if (parensLevel >= 0) {
+      // Scan for ->, but only until parensLevel != 1
+      while (parensLevel == 1) {
+        lookahead = lexer.nextToken(data, lookahead);
+
+        if (TokenChecker.isLeftParenthesis(lookahead)) {
+          parensLevel += 1;
+        } else if (TokenChecker.isRightParenthesis(lookahead)) {
+          parensLevel -= 1;
+        }
+      }
+
+      lookahead = lexer.nextToken(data, lookahead);
+
+      if (parensLevel == 0 && TokenChecker.isLambda(lookahead)) {
+        return expressionLambda(lexer, data, inputTokenAndHistory);
+      }
+    }
+
+    return expressionbastAsgnExpr(lexer, data, inputTokenAndHistory);
+  }
+
+
+  /**
+   * Parse lambda expression.
+   *
+   * @param lexer the lexer
+   * @param data the data
+   * @param inputTokenAndHistory the input token
+   * @return the result of the parser
+   */
+  public ParseResult<AbstractBastExpr> expressionLambda(final JavaLexer lexer,
+      final FileData data, final TokenAndHistory inputTokenAndHistory) {
+
+    final LinkedList<BastParameter> parameterList = new LinkedList<>();
+
+    TokenAndHistory nextToken = lexer.nextToken(data, inputTokenAndHistory);
+
+    if (TokenChecker.isLeftParenthesis(nextToken)) {
+      TokenAndHistory startToken = nextToken;
+
+      // Check whether parameter list is empty
+      nextToken = lexer.nextToken(data, nextToken);
+      if (!TokenChecker.isRightParenthesis(nextToken)) {
+        do {
+          ParseResult<LinkedList<AbstractBastSpecifier>> modifiersRes =
+              modifierList(lexer, data, startToken, true);
+
+          nextToken = lexer.nextToken(data, modifiersRes.currentTokenAndHistory);
+
+          if (TokenChecker.isIdentifier(nextToken)) {
+            final ParseResult<BastNameIdent> nameRes1 = identifier(lexer, data,
+                modifiersRes.currentTokenAndHistory);
+
+            // Check whether nameRes1 denotes a class type
+            nextToken = lexer.nextToken(data, nameRes1.currentTokenAndHistory);
+            switch (((JavaToken) nextToken.token).type) {
+              case IDENTIFIER:
+              case LBRACKET:
+              case POINT: {
+                // Backtrack and parse it as a type
+                final ParseResult<BastType> typeRes = type(lexer, data,
+                    modifiersRes.currentTokenAndHistory);
+
+                final LinkedList<AbstractBastSpecifier> modifiers = modifiersRes.value == null
+                    ? new LinkedList<>()
+                    : modifiersRes.value;
+
+                modifiers.add(new BastTypeSpecifier(null, typeRes.value));
+
+                final ParseResult<BastNameIdent> nameRes = identifier(lexer, data,
+                    typeRes.currentTokenAndHistory);
+
+                parameterList.add(new BastParameter(
+                    new TokenAndHistory[] { startToken },
+                    modifiers,
+                    new BastIdentDeclarator(null, nameRes.value, null, null)));
+
+                nextToken = nameRes.currentTokenAndHistory;
+                break;
+              }
+
+              default: {
+                parameterList.add(new BastParameter(
+                    new TokenAndHistory[] { startToken },
+                    modifiersRes.value,
+                    new BastIdentDeclarator(null, nameRes1.value, null, null)));
+
+                nextToken = nameRes1.currentTokenAndHistory;
+              }
+            }
+          } else {
+            final ParseResult<BastType> typeRes = type(lexer, data, nextToken);
+
+            final LinkedList<AbstractBastSpecifier> modifiers = modifiersRes.value == null
+                ? new LinkedList<>()
+                : modifiersRes.value;
+
+            modifiers.add(new BastTypeSpecifier(null, typeRes.value));
+
+            final ParseResult<BastNameIdent> nameRes = identifier(lexer, data,
+                typeRes.currentTokenAndHistory);
+
+            parameterList.add(new BastParameter(
+                new TokenAndHistory[] { startToken },
+                modifiers,
+                new BastIdentDeclarator(null, nameRes.value, null, null)));
+
+            nextToken = nameRes.currentTokenAndHistory;
+          }
+
+          nextToken = lexer.nextToken(data, nextToken);
+          if (!TokenChecker.isComma(nextToken)) {
+            TokenChecker.expectRightParenthesis(nextToken);
+            break;
+          }
+          startToken = nextToken;
+        } while (true);
+      }
+    } else {
+      TokenChecker.expectIdentifier(nextToken);
+      final ParseResult<BastNameIdent> nameRes = identifier(lexer, data, inputTokenAndHistory);
+      parameterList.add(new BastParameter(
+          new TokenAndHistory[0],
+          null,
+          new BastIdentDeclarator(null, nameRes.value, null, null)));
+    }
+
+    nextToken = lexer.nextToken(data, nextToken);
+    TokenChecker.expectLambda(nextToken);
+
+    final TokenAndHistory old = nextToken;
+    nextToken = lexer.nextToken(data, nextToken);
+
+    if (TokenChecker.isLeftBrace(nextToken)) {
+      final ParseResult<BastBlock> blockRes = block(lexer, data, old, false);
+
+      return new ParseResult<AbstractBastExpr>(
+          new BastLambdaExpr(new TokenAndHistory[] { old }, parameterList, blockRes.value),
+          blockRes.currentTokenAndHistory);
+    } else {
+      final ParseResult<AbstractBastExpr> exprRes = expressionAsgnOrLambda(lexer, data, old);
+
+      return new ParseResult<AbstractBastExpr>(
+          new BastLambdaExpr(new TokenAndHistory[] { old }, parameterList, exprRes.value),
+          exprRes.currentTokenAndHistory);
     }
   }
 
@@ -2455,13 +2629,13 @@ public class JavaParser implements IParser {
     TokenAndHistory currentTokenAndHistory = inputTokenAndHistory;
     LinkedList<AbstractBastExpr> list = null;
     ParseResult<AbstractBastExpr> expr =
-        expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+        expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
     currentTokenAndHistory = expr.currentTokenAndHistory;
     list = add(list, expr.value);
     TokenAndHistory nextToken = lexer.nextToken(data, currentTokenAndHistory);
     while (TokenChecker.isComma(nextToken)) {
       currentTokenAndHistory = nextToken;
-      expr = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+      expr = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
       list = add(list, expr.value);
       currentTokenAndHistory = expr.currentTokenAndHistory;
       nextToken = lexer.nextToken(data, currentTokenAndHistory);
@@ -2685,7 +2859,7 @@ public class JavaParser implements IParser {
             currentTokenAndHistory = nextToken;
             tokens[2] = currentTokenAndHistory;
             currentTokenAndHistory = currentTokenAndHistory.setFlushed();
-            listStmt = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+            listStmt = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
 
             currentTokenAndHistory = listStmt.currentTokenAndHistory;
           } else {
@@ -2784,7 +2958,7 @@ public class JavaParser implements IParser {
       currentTokenAndHistory = currentTokenAndHistory.setFlushed();
       nextToken = lexer.nextToken(data, currentTokenAndHistory);
       if (TokenChecker.isNotSemicolon(nextToken)) {
-        condition = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+        condition = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
         currentTokenAndHistory = condition.currentTokenAndHistory;
         nextToken = lexer.nextToken(data, currentTokenAndHistory);
       }
@@ -2881,10 +3055,27 @@ public class JavaParser implements IParser {
     // Identifier ConstructorDeclaratorRest
     TokenAndHistory currentTokenAndHistory = inputTokenAndHistory;
     TokenAndHistory nextToken = lexer.nextToken(data, currentTokenAndHistory);
+
+    LinkedList<BastAnnotation> returnAnnotations = null;;
+    if (typeParameters != null) {
+      returnAnnotations = new LinkedList<BastAnnotation>();
+      while (TokenChecker.isAt(nextToken)) {
+        final ParseResult<BastAnnotation> ann = annotation(lexer, data, currentTokenAndHistory);
+        returnAnnotations.add(ann.value);
+        currentTokenAndHistory = ann.currentTokenAndHistory;
+        nextToken = lexer.nextToken(data, currentTokenAndHistory);
+      }
+
+      if (returnAnnotations.isEmpty()) {
+        returnAnnotations = null;
+      }
+    }
+
     ParseResult<BastNameIdent> nameRes = new ParseResult<BastNameIdent>(null, null);
     switch (((JavaToken) nextToken.token).type) {
       case VOID:
-        return methodOrFieldRest(lexer, data, currentTokenAndHistory, typeParameters);
+        return methodOrFieldRest(lexer, data, currentTokenAndHistory, typeParameters,
+            returnAnnotations);
       case BYTE:
       case SHORT:
       case CHAR:
@@ -2893,16 +3084,19 @@ public class JavaParser implements IParser {
       case FLOAT:
       case DOUBLE:
       case BOOLEAN:
-        return methodDeclaratorRest(lexer, data, currentTokenAndHistory, true, typeParameters);
+        return methodDeclaratorRest(lexer, data, currentTokenAndHistory, true, typeParameters,
+            returnAnnotations);
       case IDENTIFIER:
         TokenAndHistory nextnextToken = lexer.nextToken(data, nextToken);
         switch (((JavaToken) nextnextToken.token).type) {
           case POINT:
           case LESS:
           case LBRACKET:
-            return methodDeclaratorRest(lexer, data, inputTokenAndHistory, true, typeParameters);
+            return methodDeclaratorRest(lexer, data, inputTokenAndHistory, true, typeParameters,
+                returnAnnotations);
           case IDENTIFIER:
-            return methodDeclaratorRest(lexer, data, currentTokenAndHistory, true, typeParameters);
+            return methodDeclaratorRest(lexer, data, currentTokenAndHistory, true, typeParameters,
+                returnAnnotations);
           case LPAREN:
             nameRes = identifier(lexer, data, currentTokenAndHistory);
             currentTokenAndHistory = nameRes.currentTokenAndHistory;
@@ -3169,6 +3363,8 @@ public class JavaParser implements IParser {
             return new ParseResult<AbstractBastExpr>(
                 new BastAccess(tokenstmp, typeRes.value, classNode), currentTokenAndHistory);
 
+          } else if (TokenChecker.isReference(nextToken)) {
+            return parseMethodReference(lexer, data, typeRes.value, nextToken);
           } else {
             return new ParseResult<AbstractBastExpr>(null, null);
           }
@@ -3306,7 +3502,7 @@ public class JavaParser implements IParser {
     tokens[1] = currentTokenAndHistory;
     currentTokenAndHistory = currentTokenAndHistory.setFlushed();
     ParseResult<AbstractBastExpr> condition =
-        expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+        expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
     currentTokenAndHistory = condition.currentTokenAndHistory;
     nextToken = lexer.nextToken(data, currentTokenAndHistory);
     TokenChecker.expectRightParenthesis(nextToken);
@@ -3577,7 +3773,7 @@ public class JavaParser implements IParser {
       case LESS:
         return interfaceGenericMethodDecl(lexer, data, currentTokenAndHistory);
       case VOID:
-        return methodDeclaratorRest(lexer, data, currentTokenAndHistory, false, null);
+        return methodDeclaratorRest(lexer, data, currentTokenAndHistory, false, null, null);
       case AT:
       case INTERFACE:
         return interfaceDeclaration(lexer, data, currentTokenAndHistory);
@@ -3872,7 +4068,7 @@ public class JavaParser implements IParser {
       case LESS:
         return genericMethodOrConstructorDecl(lexer, data, currentTokenAndHistory);
       case VOID:
-        return methodDeclaratorRest(lexer, data, currentTokenAndHistory, false, null);
+        return methodDeclaratorRest(lexer, data, currentTokenAndHistory, false, null, null);
       case AT:
         nextToken = lexer.nextToken(data, nextToken);
         if (TokenChecker.isInterface(nextToken)) {
@@ -4001,7 +4197,8 @@ public class JavaParser implements IParser {
 
   private ParseResult<AbstractBastInternalDecl> methodDeclaratorRest(final JavaLexer lexer,
       final FileData data, final TokenAndHistory inputTokenAndHistory, boolean withBrackets,
-      LinkedList<BastTypeParameter> typeParameters) {
+      LinkedList<BastTypeParameter> typeParameters,
+      final LinkedList<BastAnnotation> returnAnnotations) {
     // MethodDeclaratorRest:
     // FormalParameters {[]} [throws QualifiedIdentifierList] ( MethodBody |
     // ;
@@ -4012,6 +4209,13 @@ public class JavaParser implements IParser {
     TokenAndHistory currentTokenAndHistory = inputTokenAndHistory;
     ParseResult<BastType> typeRes = type(lexer, data, currentTokenAndHistory);
     currentTokenAndHistory = typeRes.currentTokenAndHistory;
+
+    if (returnAnnotations != null) {
+      typeRes = new ParseResult<BastType>(
+          new BastAnnotatedType(new TokenAndHistory[0], returnAnnotations, typeRes.value),
+          typeRes.currentTokenAndHistory);
+    }
+
     TokenAndHistory nextToken = lexer.nextToken(data, currentTokenAndHistory);
     TokenChecker.assertNotExpected(nextToken);
     ParseResult<BastNameIdent> nameRes = identifier(lexer, data, currentTokenAndHistory);
@@ -4102,12 +4306,13 @@ public class JavaParser implements IParser {
     // MethodOrFieldDecl:
     // Type Identifier MethodOrFieldRest
     TokenAndHistory currentTokenAndHistory = inputTokenAndHistory;
-    return methodOrFieldRest(lexer, data, currentTokenAndHistory, null);
+    return methodOrFieldRest(lexer, data, currentTokenAndHistory, null, null);
   }
 
   private ParseResult<AbstractBastInternalDecl> methodOrFieldRest(final JavaLexer lexer,
       final FileData data, final TokenAndHistory inputTokenAndHistory,
-      LinkedList<BastTypeParameter> typeParameters) {
+      LinkedList<BastTypeParameter> typeParameters,
+      final LinkedList<BastAnnotation> returnAnnotations) {
     // Changed to fit Java 1.7 20120301
     // MethodOrFieldRest:
     // FieldDeclaratorsRest ;
@@ -4119,7 +4324,8 @@ public class JavaParser implements IParser {
     currentTokenAndHistory = nameRes.currentTokenAndHistory;
     TokenAndHistory nextToken = lexer.nextToken(data, currentTokenAndHistory);
     if (TokenChecker.isLeftParenthesis(nextToken)) {
-      return methodDeclaratorRest(lexer, data, inputTokenAndHistory, true, typeParameters);
+      return methodDeclaratorRest(lexer, data, inputTokenAndHistory, true, typeParameters,
+          returnAnnotations);
     } else {
       ParseResult<AbstractBastInternalDecl> tmp =
           fieldDeclaratorRest(lexer, data, inputTokenAndHistory);
@@ -4496,7 +4702,7 @@ public class JavaParser implements IParser {
       currentTokenAndHistory = nextToken;
     }
     ParseResult<AbstractBastExpr> expr =
-        expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+        expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
     currentTokenAndHistory = expr.currentTokenAndHistory;
     nextToken = lexer.nextToken(data, currentTokenAndHistory);
     TokenChecker.expectRightParenthesis(nextToken);
@@ -4608,7 +4814,7 @@ public class JavaParser implements IParser {
     if (typeRes.value == null || TokenChecker.isNotRightParenthesis(nextToken)) {
       currentTokenAndHistory = recoveryTokenAndHistory;
       typeRes = new ParseResult<BastType>(null, currentTokenAndHistory);
-      expr = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+      expr = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
       if (expr.value == null) {
         return new ParseResult<AbstractBastExpr>(null, null);
       }
@@ -4675,7 +4881,7 @@ public class JavaParser implements IParser {
             return new ParseResult<AbstractBastExpr>(expr.value, currentTokenAndHistory);
           }
           currentTokenAndHistory = recoveryTokenAndHistory;
-          expr = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+          expr = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
           currentTokenAndHistory = expr.currentTokenAndHistory;
           nextToken = lexer.nextToken(data, currentTokenAndHistory);
           TokenChecker.expectRightParenthesis(nextToken);
@@ -4742,7 +4948,7 @@ public class JavaParser implements IParser {
       return new ParseResult<AbstractBastExpr>(expr.value, currentTokenAndHistory);
     }
     currentTokenAndHistory = recoveryTokenAndHistory;
-    expr = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+    expr = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
     currentTokenAndHistory = expr.currentTokenAndHistory;
     TokenAndHistory nextToken = lexer.nextToken(data, currentTokenAndHistory);
     TokenChecker.expectRightParenthesis(nextToken);
@@ -4892,6 +5098,9 @@ public class JavaParser implements IParser {
       currentTokenAndHistory = expr.currentTokenAndHistory;
       nextToken = lexer.nextToken(data, currentTokenAndHistory);
     }
+    if (TokenChecker.isReference(nextToken)) {
+      return parseMethodReference(lexer, data, expr.value, nextToken);
+    }
     while (TokenChecker.isPlusPlus(nextToken) || TokenChecker.isMinusMinus(nextToken)) {
       TokenAndHistory[] tokens = new TokenAndHistory[2];
       tokens[0] = nextToken;
@@ -4993,9 +5202,9 @@ public class JavaParser implements IParser {
 
   }
 
-  private ParseResult<AbstractBastExpr> primary(final JavaLexer lexer, final FileData data,
+  private ParseResult<AbstractBastExpr> primaryPrefix(final JavaLexer lexer, final FileData data,
       final TokenAndHistory inputTokenAndHistory) {
-    // Primary:
+    // PrimaryPrefix:
     // ParExpression
     // NonWildcardTypeArguments (ExplicitGenericInvocationSuffix | this
     // Arguments)
@@ -5084,6 +5293,54 @@ public class JavaParser implements IParser {
         // Do nothing
     }
     return new ParseResult<AbstractBastExpr>(null, null);
+  }
+
+  private ParseResult<AbstractBastExpr> primary(final JavaLexer lexer, final FileData data,
+      final TokenAndHistory inputTokenAndHistory) {
+    // Primary:
+    // PrimaryPrefix [ :: [TypeArguments] ( Identifier | new ) ]
+
+    final ParseResult<AbstractBastExpr> primaryResult = primaryPrefix(lexer, data,
+        inputTokenAndHistory);
+
+    TokenAndHistory nextToken = lexer.nextToken(data, primaryResult.currentTokenAndHistory);
+    if (TokenChecker.isReference(nextToken)) {
+      return parseMethodReference(lexer, data, primaryResult.value, nextToken);
+    } else {
+      return primaryResult;
+    }
+  }
+
+  private ParseResult<AbstractBastExpr> parseMethodReference(final JavaLexer lexer,
+      final FileData data, final AbstractBastExpr target,
+      final TokenAndHistory inputTokenAndHistory) {
+    
+    final TokenAndHistory[] tokens = { inputTokenAndHistory };
+
+    ParseResult<LinkedList<BastTypeArgument>> typeParameters =
+        new ParseResult<LinkedList<BastTypeArgument>>(null, null);
+
+    TokenAndHistory currentTokenAndHistory = inputTokenAndHistory;
+
+    TokenAndHistory nextNextToken = lexer.nextToken(data, currentTokenAndHistory);
+    if (TokenChecker.isLess(nextNextToken)) {
+      typeParameters = typeArgumentList(lexer, data, currentTokenAndHistory, true, false);
+      currentTokenAndHistory = typeParameters.currentTokenAndHistory;
+    }
+
+    nextNextToken = lexer.nextToken(data, currentTokenAndHistory);
+    if (TokenChecker.isNew(nextNextToken)) {
+      return new ParseResult<AbstractBastExpr>(
+          new BastMethodReference(tokens, target, typeParameters.value),
+          nextNextToken);
+    } else {
+      TokenChecker.expectIdentifier(nextNextToken);
+      ParseResult<BastNameIdent> nameRes = identifier(lexer, data, currentTokenAndHistory);
+
+      return new ParseResult<AbstractBastExpr>(
+          new BastMethodReference(tokens, target, typeParameters.value, nameRes.value),
+          nameRes.currentTokenAndHistory);
+    }
   }
 
   private ParseResult<AbstractBastExpr> parseSuperInPrimary(final JavaLexer lexer,
@@ -5307,7 +5564,7 @@ public class JavaParser implements IParser {
     TokenAndHistory[] tokens = { currentTokenAndHistory };
 
     ParseResult<AbstractBastExpr> expr =
-        expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+        expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
     BastTypeSpecifier typeSpec = new BastTypeSpecifier(null, typeRes.value);
     BastIdentDeclarator declarator = new BastIdentDeclarator(tokens, nameRes.value);
     LinkedList<AbstractBastSpecifier> specifierList = new LinkedList<AbstractBastSpecifier>();
@@ -5442,7 +5699,7 @@ public class JavaParser implements IParser {
         additionalTokens.add(currentTokenAndHistory);
         currentTokenAndHistory = currentTokenAndHistory.setFlushed();
         ParseResult<AbstractBastExpr> exprRes =
-            expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+            expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
         assert (exprRes.value != null);
         currentTokenAndHistory = exprRes.currentTokenAndHistory;
         nextToken = lexer.nextToken(data, currentTokenAndHistory);
@@ -5706,7 +5963,7 @@ public class JavaParser implements IParser {
     TokenAndHistory nextToken = lexer.nextToken(data, currentTokenAndHistory);
     ParseResult<AbstractBastExpr> exprStmt = new ParseResult<AbstractBastExpr>(null, null);
     if (TokenChecker.isNotSemicolon(nextToken)) {
-      exprStmt = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+      exprStmt = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
       assert (exprStmt.value != null);
       currentTokenAndHistory = exprStmt.currentTokenAndHistory;
     }
@@ -5724,7 +5981,7 @@ public class JavaParser implements IParser {
     TokenAndHistory currentTokenAndHistory = inputTokenAndHistory;
     final TokenAndHistory[] throwTokens = { currentTokenAndHistory };
     ParseResult<AbstractBastExpr> exprStmt =
-        expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+        expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
     currentTokenAndHistory = exprStmt.currentTokenAndHistory;
     TokenAndHistory nextToken = lexer.nextToken(data, currentTokenAndHistory);
     TokenChecker.expectSemicolon(nextToken);
@@ -5814,7 +6071,7 @@ public class JavaParser implements IParser {
       case CASE:
         currentTokenAndHistory = nextToken;
         tokens[0] = currentTokenAndHistory;
-        expr = expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+        expr = expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
         currentTokenAndHistory = expr.currentTokenAndHistory;
         nextToken = lexer.nextToken(data, currentTokenAndHistory);
         TokenChecker.expectColon(nextToken);
@@ -6038,7 +6295,28 @@ public class JavaParser implements IParser {
       tokens = new TokenAndHistory[1];
       tokens[0] = currentTokenAndHistory;
       BastType type = new BastBasicType(tokens, typeConstant);
-      nextToken = lexer.nextToken(data, currentTokenAndHistory);
+      return parseArrayTypeSuffix(lexer, data, currentTokenAndHistory, type);
+    }
+    return new ParseResult<BastType>(null, null);
+  }
+
+  private ParseResult<BastType> parseClassType(final JavaLexer lexer, final FileData data,
+      final TokenAndHistory inputTokenAndHistory) {
+    TokenAndHistory currentTokenAndHistory = inputTokenAndHistory;
+
+    ParseResult<BastClassType> typeRes = classType(lexer, data, currentTokenAndHistory);
+    currentTokenAndHistory = typeRes.currentTokenAndHistory;
+    BastType type = typeRes.value;
+    return parseArrayTypeSuffix(lexer, data, currentTokenAndHistory, type);
+  }
+
+  private ParseResult<BastType> parseArrayTypeSuffix(final JavaLexer lexer, final FileData data,
+      final TokenAndHistory inputTokenAndHistory, final BastType initialType) {
+    TokenAndHistory currentTokenAndHistory = inputTokenAndHistory;
+    BastType type = initialType;
+
+    while (true) {
+      TokenAndHistory nextToken = lexer.nextToken(data, currentTokenAndHistory);
       TokenAndHistory nextnextToken = lexer.nextToken(data, nextToken);
       int count = 0;
       ArrayList<TokenAndHistory> additionalTokens = new ArrayList<>();
@@ -6053,46 +6331,29 @@ public class JavaParser implements IParser {
         count++;
       }
       if (count != 0) {
-        tokens = new TokenAndHistory[2];
+        TokenAndHistory[] tokens = new TokenAndHistory[2];
         tokens[1] = new TokenAndHistory(new ListToken(additionalTokens));
         currentTokenAndHistory = currentTokenAndHistory.setFlushed();
         type = new BastArrayType(tokens, type, null, count);
       }
-      return new ParseResult<BastType>(type, currentTokenAndHistory);
-    }
-    return new ParseResult<BastType>(null, null);
-  }
 
-  private ParseResult<BastType> parseClassType(final JavaLexer lexer, final FileData data,
-      final TokenAndHistory inputTokenAndHistory) {
-    TokenAndHistory currentTokenAndHistory = inputTokenAndHistory;
+      if (TokenChecker.isAt(nextToken)) {
+        final LinkedList<BastAnnotation> annotations = new LinkedList<>();
 
-    ParseResult<BastClassType> type = classType(lexer, data, currentTokenAndHistory);
-    currentTokenAndHistory = type.currentTokenAndHistory;
-    TokenAndHistory nextToken = lexer.nextToken(data, currentTokenAndHistory);
-    TokenAndHistory nextnextToken = lexer.nextToken(data, nextToken);
-    int count = 0;
-    ArrayList<TokenAndHistory> additionalTokens = new ArrayList<>();
-    while (TokenChecker.isLeftBracket(nextToken) && TokenChecker.isRightBracket(nextnextToken)) {
-      additionalTokens.add(nextToken);
-      currentTokenAndHistory = nextToken.setFlushed();
-      nextToken = lexer.nextToken(data, currentTokenAndHistory);
-      additionalTokens.add(nextToken);
-      currentTokenAndHistory = nextToken.setFlushed();
-      nextToken = lexer.nextToken(data, currentTokenAndHistory);
-      nextnextToken = lexer.nextToken(data, nextToken);
-      count++;
+        do {
+          ParseResult<BastAnnotation> annRes = annotation(lexer, data, currentTokenAndHistory);
+          annotations.add(annRes.value);
+          currentTokenAndHistory = annRes.currentTokenAndHistory;
+          nextToken = lexer.nextToken(data, currentTokenAndHistory);
+        } while (TokenChecker.isAt(nextToken));
 
+        type = new BastAnnotatedType(new TokenAndHistory[0], annotations, type);
+      } else {
+        break;
+      }
     }
-    if (count != 0) {
-      TokenAndHistory[] tokenstmp = new TokenAndHistory[2];
-      tokenstmp[1] = new TokenAndHistory(new ListToken(additionalTokens));
-      currentTokenAndHistory = currentTokenAndHistory.setFlushed();
-      return new ParseResult<BastType>(new BastArrayType(tokenstmp, type.value, null, count),
-          currentTokenAndHistory);
-    } else {
-      return new ParseResult<BastType>(type.value, currentTokenAndHistory);
-    }
+
+    return new ParseResult<BastType>(type, currentTokenAndHistory);
   }
 
   /**
@@ -6483,7 +6744,7 @@ public class JavaParser implements IParser {
       return new ParseResult<AbstractBastInitializer>(tmp.value, tmp.currentTokenAndHistory);
     } else {
       ParseResult<AbstractBastExpr> expr =
-          expressionbastAsgnExpr(lexer, data, currentTokenAndHistory);
+          expressionAsgnOrLambda(lexer, data, currentTokenAndHistory);
       currentTokenAndHistory = expr.currentTokenAndHistory;
       return new ParseResult<AbstractBastInitializer>(new BastExprInitializer(null, expr.value),
           expr.currentTokenAndHistory);
